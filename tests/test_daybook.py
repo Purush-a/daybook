@@ -65,11 +65,14 @@ def test(fn):
     return fn
 
 class Ctx:
-    def __init__(self, browser, mobile=True, viewport=(390, 844), claude=False, seed=None, clock=None, sw=False):
+    def __init__(self, browser, mobile=True, viewport=(390, 844), claude=False, seed=None, clock=None, sw=False, tours=False):
         opts = dict(viewport={'width': viewport[0], 'height': viewport[1]}, service_workers='allow' if sw else 'block', accept_downloads=True)
         if mobile:
             opts.update(device_scale_factor=3, is_mobile=True, has_touch=True, user_agent=IPHONE_UA)
         self.ctx = browser.new_context(**opts)
+        if not tours:
+            # the guided tours cover the page; only the tour tests turn them on
+            self.ctx.add_init_script("try { const p = JSON.parse(localStorage.getItem('daybook.prefs') || '{}'); if (!p.tours) { p.tours = {guide: 1, news: 1, pick: 1}; localStorage.setItem('daybook.prefs', JSON.stringify(p)); } } catch (e) {}")
         if not REAL_FONTS:
             self.ctx.route('**/fonts.googleapis.com/**', lambda r: r.abort())
             self.ctx.route('**/fonts.gstatic.com/**', lambda r: r.abort())
@@ -106,7 +109,7 @@ def sample(c):
     c.page.wait_for_selector('[data-action="welcome-sample"]', state='visible')
     c.tap('[data-action="welcome-sample"]'); c.page.wait_for_timeout(450)
 
-def add(c, amount, cat=None, note=None, when=None, pay=None):
+def add(c, amount, cat=None, note=None, when=None, pay=None, group=None):
     p = c.page
     c.tap('.fab'); p.wait_for_selector('#saveBtn', state='visible'); p.wait_for_timeout(350)
     for k in str(amount): c.tap(f'.key[data-k="{k}"]')
@@ -114,7 +117,27 @@ def add(c, amount, cat=None, note=None, when=None, pay=None):
     if note: p.fill('#noteIn', note)
     if when: c.tap(f'[data-action="pick-date"]:has-text("{when}")')
     if pay: c.tap(f'[data-action="pick-pay"][data-v="{pay}"]')
+    if group is not None: p.select_option('#grpSel', group)
     c.tap('#saveBtn'); p.wait_for_timeout(400)
+
+def make_group(c, name, icon=None, target=None, in_budget=True):
+    p = c.page
+    c.tap('.tab[data-view="plan"]')
+    c.tap('[data-action="grp-new"]'); p.wait_for_selector('#gName', state='visible'); p.wait_for_timeout(350)
+    p.fill('#gName', name)
+    if icon: c.tap(f'[data-action="grp-icon"][data-v="{icon}"]')
+    if target: p.fill('#gTarget', str(target))
+    if not in_budget: c.tap('[data-action="grp-budget"]')
+    c.tap('[data-action="grp-save"]'); p.wait_for_timeout(400)
+    return [g for g in store(p)['settings']['groups'] if g['name'] == name][-1]
+
+def state(settings, months):
+    return {'daybook.v1': json.dumps({'v': 1, 'mode': 'local', 'settings': settings, 'months': months})}
+
+def ex(id, a, c, d, n='', g=None):
+    e = {'id': id, 'a': a, 'c': c, 'n': n, 'd': d, 'p': 'upi', 't': 1}
+    if g: e['g'] = g
+    return e
 
 def store(p):
     return p.evaluate("JSON.parse(localStorage.getItem('daybook.v1') || 'null')")
@@ -403,8 +426,8 @@ def csv_export(b):
     with p.expect_download() as d:
         c.tap('[data-action="export"]')
     raw = open(d.value.path(), encoding='utf-8-sig').read().splitlines()
-    check(raw[0] == 'Date,Category,Group,Note,Amount,Currency,Paid with', 'csv header')
-    check(raw[1].endswith(',Eating Out & Snacks,Wants,"Dosa, ""masala""",120,INR,UPI'), 'csv row escaping: ' + raw[1])
+    check(raw[0] == 'Date,Category,Type,Note,Amount,Currency,Paid with,Group', 'csv header: ' + raw[0])
+    check(raw[1].endswith(',Eating Out & Snacks,Wants,"Dosa, ""masala""",120,INR,UPI,'), 'csv row escaping: ' + raw[1])
     return c.close()
 
 @test
@@ -444,11 +467,347 @@ def keyboard_shortcuts(b):
     check(len(items(p)) == 1 and text(p, '#amtVal') == '0', 'digits typed in the note stay in the note; Enter with no amount does nothing')
     return c.close()
 
+# ------------------------------------------------------------------ groups, monthly income, welcome amounts
+@test
+def group_kept_out_of_budget(b):
+    c = Ctx(b, clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go(); setup(c, '30000')
+    g = make_group(c, 'New car', '🚗', '800000', in_budget=False)
+    check(g['apart'] and g['target'] == 800000 and g['icon'] == '🚗' and not g['done'], 'group saved ' + str(g))
+    check('Created New car' in toast(p), 'created toast: ' + toast(p))
+    check('New car' in text(p, '#planGroups') and 'outside budget' in text(p, '#planGroups'), 'listed in Plan')
+    c.tap('.tab[data-view="home"]')
+    check('₹0 of ₹8,00,000' in text(p, '#view-home'), 'Home shows the group before any spending')
+    c.tap('.fab'); p.wait_for_selector('#grpSel', state='visible'); p.wait_for_timeout(350)
+    check(p.input_value('#grpSel') == '', 'a new expense starts with no group')
+    for k in '200000': c.tap(f'.key[data-k="{k}"]')
+    c.tap('.cp[data-cat="other"]')
+    p.select_option('#grpSel', g['id']); p.wait_for_timeout(100)
+    hint = text(p, '#sheetHint')
+    check('₹6,00,000 left of the ₹8,00,000 New car plan' in hint and 'Outside your budget' in hint, 'hint: ' + hint)
+    check('over' not in p.get_attribute('#saveBtn', 'class') and 'on' in p.get_attribute('#grpSel', 'class'), 'not over, picker highlighted')
+    p.fill('#noteIn', 'Down payment')
+    c.tap('#saveBtn'); p.wait_for_timeout(400)
+    check('outside your monthly budget' in toast(p), 'toast: ' + toast(p))
+    it = items(p); check(len(it) == 1 and it[0]['g'] == g['id'], 'stored with its group ' + str(it))
+    check('₹30,000' in text(p, '.hero-num') and 'left' in text(p, '.hero-num'), 'budget untouched: ' + text(p, '.hero-num'))
+    check('Spent today\n₹0' in text(p, '.trio'), 'spent today leaves it out: ' + text(p, '.trio'))
+    check('Categories appear here as you spend' in text(p, '#view-home'), 'no category spending counted')
+    home = text(p, '#view-home')
+    check('₹2,00,000 of ₹8,00,000' in home and '₹6,00,000 left of plan · outside your budget' in home, 'group progress on Home')
+    check(text(p, '.list .row-sub').startswith('🚗 New car · '), 'recent row names the group: ' + text(p, '.list .row-sub'))
+    c.tap(f'.cat-row[data-cat="g:{g["id"]}"]'); p.wait_for_timeout(300)
+    check(p.is_visible('#view-history') and p.get_attribute(f'#histChips [data-cat="g:{g["id"]}"]', 'aria-pressed') == 'true', 'Home row opens filtered History')
+    card = text(p, '.gcard')
+    check('of ₹8,00,000 planned' in card and 'Kept out of your monthly budget' in card, 'group card: ' + card)
+    c.tap('[data-action="add-grp"]'); p.wait_for_selector('#saveBtn', state='visible'); p.wait_for_timeout(350)
+    check(p.input_value('#grpSel') == g['id'], 'Add to New car preselects the group')
+    for k in '5000': c.tap(f'.key[data-k="{k}"]')
+    c.tap('#saveBtn'); p.wait_for_timeout(400)
+    check(len(p.query_selector_all('#histList .row')) == 2 and '₹2,05,000 spent' in text(p, '.mhead'), 'History lists and totals the group')
+    c.tap('[data-action="add-grp"]'); p.wait_for_timeout(400)
+    for k in '600000': c.tap(f'.key[data-k="{k}"]')
+    check('₹5,000 past the ₹8,00,000 New car plan' in text(p, '#sheetHint') and 'anyway' in text(p, '#saveBtn'), 'over the plan warns: ' + text(p, '#sheetHint'))
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('#histChips [data-cat="all"]'); p.fill('#histSearch', 'new car')
+    check(len(p.query_selector_all('#histList .row')) == 2, 'search finds expenses by group name')
+    c.tap('.tab[data-view="insights"]')
+    ins = text(p, '#view-insights')
+    check('Not counted on this page: ₹2,05,000 for 🚗 New car' in ins and 'Spent\n₹0' in ins, 'Insights leaves it out and says so')
+    return c.close()
+
+@test
+def group_counted_in_budget(b):
+    c = Ctx(b); p = c.go(); setup(c, '30000')
+    g = make_group(c, 'Goa trip', '🏖️', '10000')
+    check(not g['apart'], 'counts in the budget by default')
+    c.tap('.tab[data-view="home"]')
+    add(c, 6000, 'travel', 'Flights', group=g['id'])
+    check('Added ₹6,000 to Travel & Commute, in Goa trip.' == toast(p), 'toast: ' + toast(p))
+    check('₹24,000' in text(p, '.hero-num'), 'counts against the budget: ' + text(p, '.hero-num'))
+    check('₹6,000' in text(p, '.cat-row[data-cat="travel"]'), 'and in its category')
+    add(c, 5000, 'fun', 'Water sports', group=g['id'])
+    check('Goa trip is now ₹1,000 past its ₹10,000 plan' in toast(p), 'plan crossing toast: ' + toast(p))
+    row = p.query_selector(f'.cat-row[data-cat="g:{g["id"]}"]')
+    check('over' in row.get_attribute('class') and '₹1,000 over plan' in row.inner_text(), 'Home row turns red over plan')
+    add(c, 40, 'food', 'Tea')
+    check(text(p, '#toastText') == 'Added ₹40 to Eating Out & Snacks.', 'ungrouped expense unaffected')
+    return c.close()
+
+@test
+def group_edit_finish_and_delete(b):
+    c = Ctx(b); p = c.go(); setup(c)
+    g = make_group(c, 'Wedding', '💍')
+    c.tap('.tab[data-view="home"]')
+    add(c, 1500, 'shopping', 'Saree', group=g['id'])
+    add(c, 300, 'food', 'Tea')
+    c.tap('.list .row:has-text("Tea")'); p.wait_for_selector('#grpSel', state='visible'); p.wait_for_timeout(300)
+    p.select_option('#grpSel', g['id']); c.tap('#saveBtn'); p.wait_for_timeout(400)
+    check(all(e.get('g') == g['id'] for e in items(p)), 'editing an expense moves it into a group')
+    c.tap('.list .row:has-text("Tea")'); p.wait_for_timeout(400)
+    p.select_option('#grpSel', ''); c.tap('#saveBtn'); p.wait_for_timeout(400)
+    check('g' not in [e for e in items(p) if e['n'] == 'Tea'][0], 'and out again')
+    c.tap('.tab[data-view="plan"]'); c.tap(f'[data-action="grp-edit"][data-id="{g["id"]}"]'); p.wait_for_timeout(400)
+    check(p.input_value('#gName') == 'Wedding' and p.get_attribute('[data-action="grp-icon"][data-v="💍"]', 'aria-checked') == 'true', 'edit sheet prefilled')
+    p.fill('#gName', '   '); c.tap('[data-action="grp-save"]')
+    check('Give the group a name' in text(p, '#gErr') and p.is_visible('#gName'), 'a name is required')
+    p.fill('#gName', 'Sister’s wedding'); c.tap('[data-action="grp-save"]'); p.wait_for_timeout(400)
+    check(store(p)['settings']['groups'][0]['name'] == 'Sister’s wedding' and toast(p) == 'Group saved', 'renamed')
+    c.tap(f'[data-action="grp-edit"][data-id="{g["id"]}"]'); p.wait_for_timeout(400)
+    c.tap('[data-action="grp-done"]'); p.wait_for_timeout(400)
+    check(store(p)['settings']['groups'][0]['done'], 'marked as finished')
+    check('finished' in text(p, '#planGroups'), 'Plan shows it as finished')
+    c.tap('.tab[data-view="home"]')
+    check(not p.query_selector(f'.cat-row[data-cat="g:{g["id"]}"]'), 'finished group leaves Home')
+    c.tap('.fab'); p.wait_for_timeout(400)
+    check(not p.query_selector('#grpSel'), 'and the add screen')
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('.list .row:has-text("Saree")'); p.wait_for_timeout(400)
+    check(p.input_value('#grpSel') == g['id'], 'an expense in a finished group still shows it when edited')
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('.tab[data-view="history"]')
+    check(p.query_selector(f'#histChips [data-cat="g:{g["id"]}"]'), 'finished group with expenses stays in History')
+    c.tap('.tab[data-view="plan"]'); c.tap(f'[data-action="grp-edit"][data-id="{g["id"]}"]'); p.wait_for_timeout(400)
+    check(text(p, '[data-action="grp-done"]') == 'Reopen group', 'can reopen')
+    c.tap('[data-action="grp-done"]'); p.wait_for_timeout(400)
+    check(not store(p)['settings']['groups'][0]['done'], 'reopened')
+    c.tap(f'[data-action="grp-edit"][data-id="{g["id"]}"]'); p.wait_for_timeout(400)
+    c.tap('[data-action="grp-delete"]')
+    check('Tap again' in text(p, '[data-action="grp-delete"]'), 'delete asks twice')
+    c.tap('[data-action="grp-delete"]'); p.wait_for_timeout(400)
+    s = store(p)
+    check(s['settings']['groups'] == [] and len(items(p)) == 2 and all('g' not in e for e in items(p)), 'group deleted, expenses kept')
+    check('Its expenses are kept' in toast(p), 'delete toast: ' + toast(p))
+    c.tap('#toastBtn'); p.wait_for_timeout(300)
+    check(len(store(p)['settings']['groups']) == 1 and [e for e in items(p) if e['n'] == 'Saree'][0].get('g') == g['id'], 'undo brings the group back')
+    return c.close()
+
+@test
+def income_differs_by_month(b):
+    months = {'2026-09': [ex('a1', 2000, 'groceries', '2026-09-05')], '2026-10': [ex('a2', 3000, 'groceries', '2026-10-05')], '2026-11': [ex('a3', 1000, 'food', '2026-11-02')]}
+    c = Ctx(b, seed=state({'setup': True, 'budget': 30000}, months), clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go()
+    c.tap('.tab[data-view="plan"]')
+    check(text(p, 'label[for="incomeIn"]') == 'Income for November', 'label names the month')
+    check(p.input_value('#incomeIn') == '' and p.get_attribute('#incomeIn', 'placeholder') == 'Optional', 'no income yet')
+    p.fill('#incomeIn', '60000'); p.dispatch_event('#incomeIn', 'change')
+    check(store(p)['settings']['incomes'] == {'2026-11': 60000}, 'saved for November: ' + str(store(p)['settings'].get('incomes')))
+    check('Saved for November only' in text(p, '#incNote'), 'note: ' + text(p, '#incNote'))
+    c.tap('.tab[data-view="insights"]')
+    check('₹60,000 income for November,' in text(p, '#insIncome') and p.query_selector('#insIncome .guide'), 'November uses its own income')
+    c.tap('[data-action="ins-prev"]')
+    check('Add your income for October' in text(p, '#insIncome') and not p.query_selector('#insIncome .guide'), 'October is not given November’s income')
+    c.tap('#insIncome [data-action="income-edit"]'); p.wait_for_selector('#incIn', state='visible'); p.wait_for_timeout(350)
+    check(text(p, '#sheetTitle') == 'Income for October 2026', 'sheet title: ' + text(p, '#sheetTitle'))
+    p.fill('#incIn', '52,500'); c.tap('[data-action="income-save"]'); p.wait_for_timeout(400)
+    check(toast(p) == 'Income for October saved.', 'toast: ' + toast(p))
+    check(store(p)['settings']['incomes'] == {'2026-10': 52500, '2026-11': 60000}, 'each month separate')
+    check('₹52,500 income for October,' in text(p, '#insIncome'), 'October shows its own')
+    c.tap('[data-action="ins-next"]')
+    check('₹60,000 income for November,' in text(p, '#insIncome'), 'November unchanged by October')
+    c.tap('[data-action="ins-prev"]'); c.tap('[data-action="ins-prev"]')
+    check('Add your income for September' in text(p, '#insIncome'), 'nothing carried backward to September')
+    p.keyboard.press('Escape')
+    return c.close()
+
+@test
+def income_carries_forward(b):
+    months = {'2026-10': [ex('a1', 3000, 'groceries', '2026-10-05')], '2026-11': [ex('a2', 1000, 'food', '2026-11-02')]}
+    c = Ctx(b, seed=state({'setup': True, 'budget': 30000, 'incomes': {'2026-10': 50000}}, months), clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go()
+    c.tap('.tab[data-view="plan"]')
+    check(p.input_value('#incomeIn') == '' and p.get_attribute('#incomeIn', 'placeholder') == '50,000', 'carried amount shown as a hint, not saved')
+    check('Using October’s ₹50,000 until you change it' in text(p, '#incNote'), 'note: ' + text(p, '#incNote'))
+    c.tap('.tab[data-view="insights"]')
+    check('₹50,000 income for November, carried over from October' in text(p, '#insIncome'), 'Insights says it was carried: ' + text(p, '#insIncome'))
+    c.tap('.tab[data-view="plan"]')
+    p.fill('#incomeIn', '55000'); p.dispatch_event('#incomeIn', 'change')
+    check(store(p)['settings']['incomes'] == {'2026-10': 50000, '2026-11': 55000}, 'a raise only changes November')
+    p.fill('#incomeIn', ''); p.dispatch_event('#incomeIn', 'change')
+    check(store(p)['settings']['incomes'] == {'2026-10': 50000} and 'Using October’s' in text(p, '#incNote'), 'clearing goes back to the carried amount')
+    p.click('body'); p.wait_for_timeout(200)
+    c.tap('[data-action="income-edit"][data-k="2026-10"]'); p.wait_for_selector('#incIn', state='visible'); p.wait_for_timeout(350)
+    check(p.input_value('#incIn') == '50,000', 'last month’s sheet prefilled')
+    p.fill('#incIn', ''); c.tap('[data-action="income-save"]'); p.wait_for_timeout(400)
+    check(toast(p) == 'Income for October cleared.' and store(p)['settings']['incomes'] == {}, 'cleared: ' + toast(p))
+    errs = c.close()
+    for when, saved, label, carried in [(datetime.datetime(2026, 12, 3, 9, 0), {'2026-11': 61000}, 'December', 'November’s ₹61,000'),
+                                        (datetime.datetime(2027, 1, 5, 9, 0), {'2026-12': 70000}, 'January', 'December’s ₹70,000')]:
+        c = Ctx(b, seed=state({'setup': True, 'budget': 30000, 'incomes': saved}, {}), clock=when); p = c.go()
+        c.tap('.tab[data-view="plan"]')
+        check(text(p, 'label[for="incomeIn"]') == f'Income for {label}' and f'Using {carried}' in text(p, '#incNote'), f'{label}: ' + text(p, '#incNote'))
+        errs += c.close()
+    return errs
+
+@test
+def income_from_older_version(b):
+    months = {'2026-09': [ex('a1', 2000, 'groceries', '2026-09-05')], '2026-10': [ex('a2', 3000, 'groceries', '2026-10-05')], '2026-11': [ex('a3', 1000, 'food', '2026-11-02')]}
+    c = Ctx(b, seed=state({'setup': True, 'budget': 30000, 'income': 45000}, months), clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go()
+    c.tap('.tab[data-view="insights"]')
+    check('₹45,000 income for November, your usual amount' in text(p, '#insIncome'), 'the single old income still applies: ' + text(p, '#insIncome'))
+    c.tap('[data-action="ins-prev"]'); c.tap('[data-action="ins-prev"]')
+    check('₹45,000 income for September, your usual amount' in text(p, '#insIncome'), 'to every month')
+    c.tap('.tab[data-view="plan"]')
+    check(p.get_attribute('#incomeIn', 'placeholder') == '45,000' and 'Using your usual ₹45,000' in text(p, '#incNote'), 'Plan: ' + text(p, '#incNote'))
+    p.fill('#incomeIn', '50000'); p.dispatch_event('#incomeIn', 'change')
+    s = store(p)['settings']
+    check(s['incomes'] == {'2026-09': 45000, '2026-11': 50000} and s['income'] == 0, 'old income kept for earlier months: ' + str(s))
+    c.tap('.tab[data-view="insights"]'); c.tap('[data-action="ins-next"]')
+    check('₹45,000 income for October, carried over from September' in text(p, '#insIncome'), 'October keeps the old amount: ' + text(p, '#insIncome'))
+    return c.close()
+
+@test
+def welcome_known_amounts(b):
+    c = Ctx(b); p = c.go()
+    p.wait_for_selector('#wBudget', state='visible')
+    check(p.is_hidden('#wMore'), 'amounts are tucked away until asked for')
+    c.tap('[data-action="welcome-more"]')
+    check(p.is_visible('#wMore') and p.get_attribute('[data-action="welcome-more"]', 'aria-expanded') == 'true', 'expands')
+    order = p.eval_on_selector_all('[data-wlimit]', 'els => els.map(e => e.dataset.wlimit)')
+    check(order[:2] == ['rent', 'card'] and order[-2:] == ['invest', 'savings'] and len(order) == 14, 'fixed payments first, goals last: ' + str(order))
+    p.fill('#wBudget', '40000')
+    p.fill('input[data-wlimit="rent"]', '15000'); p.fill('input[data-wlimit="card"]', '8,000'); p.fill('input[data-wlimit="savings"]', '5000')
+    check('₹23,000 of your ₹40,000 budget, leaving ₹17,000' in text(p, '#wSum'), 'running total leaves out goals: ' + text(p, '#wSum'))
+    p.fill('#wBudget', '20000')
+    check('warn' in p.get_attribute('#wSum', 'class') and '₹3,000 more than your budget' in text(p, '#wSum'), 'warns when over the budget')
+    p.fill('#wBudget', '40000')
+    p.select_option('#wCur', 'USD'); p.wait_for_timeout(100)
+    check(text(p, '.wsym') == '$' and '$23,000' in text(p, '#wSum'), 'currency change updates the amounts')
+    p.select_option('#wCur', 'INR'); p.wait_for_timeout(100)
+    p.screenshot(path=f'{SHOTS}/welcome-amounts.png')
+    c.tap('[data-action="welcome-start"]'); p.wait_for_timeout(400)
+    s = store(p)['settings']
+    check(s['limits'] == {'rent': 15000, 'card': 8000, 'savings': 5000} and s['budget'] == 40000, 'saved as limits ' + str(s['limits']))
+    check(toast(p) == 'Budget and 3 monthly amounts saved. Change them anytime in Plan.', 'toast: ' + toast(p))
+    check('₹0 of ₹15,000' in text(p, '.cat-row[data-cat="rent"]') and '₹0 of ₹5,000' in text(p, '.cat-row[data-cat="savings"]'), 'Home shows them')
+    c.tap('.tab[data-view="plan"]')
+    check(p.input_value('input[data-limit="card"]') == '8,000', 'Plan shows them')
+    errs = c.close()
+    c = Ctx(b); p = c.go(); p.wait_for_selector('#wBudget', state='visible')
+    c.tap('[data-action="welcome-more"]'); p.fill('input[data-wlimit="rent"]', '9000')
+    c.tap('[data-action="welcome-start"]'); p.wait_for_timeout(400)
+    check(store(p)['settings']['limits'] == {'rent': 9000} and toast(p) == '1 monthly amount saved. Change them anytime in Plan.', 'amounts without a budget: ' + toast(p))
+    return errs + c.close()
+
+@test
+def groups_and_income_in_backups(b):
+    c = Ctx(b, mobile=False, clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go(); setup(c)
+    g = make_group(c, 'New car', '🚗', '500000', in_budget=False)
+    p.fill('#incomeIn', '70000'); p.dispatch_event('#incomeIn', 'change')
+    c.tap('.tab[data-view="home"]')
+    add(c, 1000, 'other', 'Booking', group=g['id'])
+    c.tap('.tab[data-view="plan"]')
+    with p.expect_download() as d:
+        c.tap('[data-action="backup"]')
+    path = d.value.path(); data = json.load(open(path))
+    check(data['settings']['groups'][0]['name'] == 'New car' and data['settings']['incomes'] == {'2026-11': 70000}, 'backup has groups and income')
+    with p.expect_download() as d2:
+        c.tap('[data-action="export"]')
+    rows = open(d2.value.path(), encoding='utf-8-sig').read().splitlines()
+    check(rows[1].endswith(',Booking,1000,INR,UPI,New car'), 'CSV names the group: ' + rows[1])
+    c.tap('[data-action="erase"]'); c.tap('[data-action="erase"]'); p.wait_for_timeout(500)
+    check(store(p)['settings']['groups'] == [] and store(p)['settings']['incomes'] == {}, 'erase clears groups and income')
+    p.set_input_files('#restoreIn', path); p.wait_for_timeout(500)
+    s = store(p)
+    check(s['settings']['groups'][0]['id'] == g['id'] and s['settings']['incomes'] == {'2026-11': 70000} and items(p)[0].get('g') == g['id'], 'restored with groups and income')
+    check('₹1,000 of ₹5,00,000' in text(p, '#view-home') and '₹30,000' in text(p, '.hero-num'), 'group still kept out of the budget after restore')
+    p.set_input_files('#restoreIn', path); p.wait_for_timeout(400)
+    check(len(store(p)['settings']['groups']) == 1, 'restoring twice does not duplicate groups')
+    return c.close()
+
+# ------------------------------------------------------------------ guided tours
+def tour_check(p, w, h, sel, tag):
+    card = p.query_selector('#tourCard').bounding_box()
+    check(card['x'] >= 0 and card['y'] >= 0 and card['x'] + card['width'] <= w + 1 and card['y'] + card['height'] <= h + 1, f'{tag}: tour card on screen {card}')
+    if sel:
+        hole, t = p.query_selector('#tourHole').bounding_box(), p.query_selector(sel).bounding_box()
+        check(hole['x'] <= t['x'] + 1 and hole['x'] + hole['width'] >= t['x'] + t['width'] - 1 and hole['y'] <= t['y'] + 1 and hole['y'] + hole['height'] > t['y'],
+              f'{tag}: spotlight on {sel} ({hole} vs {t})')
+    check(p.evaluate('document.documentElement.scrollWidth') <= w, f'{tag}: no sideways scroll')
+
+@test
+def tour_after_welcome(b):
+    errs = []
+    steps = [('home', '.hero', 'Your month at a glance'), ('home', '.fab', 'Log an expense'),
+             ('plan', '#incomeIn', 'Income, month by month'), ('plan', '#planGroups', 'Groups for big plans')]
+    for name in ('iphone-15', 'iphone-se-1', 'landscape'):
+        w, h = SIZES[name]
+        c = Ctx(b, viewport=(w, h), tours=True); p = c.go(); setup(c, '30000'); p.wait_for_timeout(300)
+        check(p.is_visible('#tourCard'), f'{name}: tour starts after the welcome')
+        for i, (v, sel, title) in enumerate(steps):
+            tag = f'{name} step {i + 1}'
+            check(text(p, '#tourTitle') == title and text(p, '.tour-step') == f'{i + 1} of 4', f'{tag}: ' + text(p, '#tourTitle'))
+            check(p.is_visible(f'#view-{v}'), f'{tag}: shows {v}')
+            tour_check(p, w, h, sel, tag)
+            p.screenshot(path=f'{SHOTS}/tour-{name}-{i + 1}.png')
+            if i == 1:
+                c.tap('[data-action="tour-back"]')
+                check(text(p, '#tourTitle') == steps[0][2], f'{tag}: Back goes to the previous step')
+                c.tap('[data-action="tour-next"]')
+            if i == 3: check(text(p, '[data-action="tour-next"]') == 'Done', 'last step says Done')
+            c.tap('[data-action="tour-next"]'); p.wait_for_timeout(120)
+        check(not p.query_selector('#tour') and p.is_visible('#view-home'), f'{name}: tour closes and returns Home')
+        check(p.evaluate("JSON.parse(localStorage.getItem('daybook.prefs')).tours.guide") == 1, 'remembered on this device')
+        add(c, 50, 'food', 'Tea')
+        check(len(items(p)) == 1, f'{name}: app works normally after the tour')
+        p.reload(); p.wait_for_timeout(800)
+        check(not p.query_selector('#tour'), f'{name}: shown only once')
+        errs += c.close()
+    c = Ctx(b, tours=True); p = c.go(); sample(c); p.wait_for_timeout(300)
+    check(p.is_visible('#tourCard') and not p.is_visible('#toast.on'), 'sample month also starts the tour')
+    c.tap('[data-action="tour-end"]'); p.wait_for_timeout(150)
+    check(not p.query_selector('#tour') and 'sample month' in toast(p), 'skipping shows the sample-month note: ' + toast(p))
+    return errs + c.close()
+
+@test
+def tour_whats_new_for_existing_users(b):
+    months = {'2026-11': [ex('a1', 400, 'food', '2026-11-02', 'Lunch')]}
+    c = Ctx(b, tours=True, seed=state({'setup': True, 'budget': 30000, 'theme': 'dark'}, months), clock=datetime.datetime(2026, 11, 16, 10, 0)); p = c.go(1000)
+    check(p.is_visible('#tourCard') and text(p, '#tourTitle') == 'New in Daybook' and text(p, '.tour-step') == '1 of 3', 'existing users get a what’s-new tour')
+    check(p.is_hidden('#tourHole') and 'dim' in p.get_attribute('#tour', 'class'), 'the intro card has no spotlight')
+    tour_check(p, 390, 844, None, 'what’s new intro')
+    p.screenshot(path=f'{SHOTS}/tour-news-dark-1.png')
+    p.keyboard.press('n'); p.wait_for_timeout(300)
+    check(p.is_hidden('#sheet'), 'shortcuts are paused during a tour')
+    p.keyboard.press('ArrowRight'); p.wait_for_timeout(150)
+    check(text(p, '#tourTitle') == 'Income, month by month' and p.is_visible('#view-plan'), 'arrow key moves on')
+    p.screenshot(path=f'{SHOTS}/tour-news-dark-2.png')
+    p.keyboard.press('Escape'); p.wait_for_timeout(150)
+    check(not p.query_selector('#tour') and p.is_visible('#view-home'), 'Escape ends the tour where it started')
+    check(p.evaluate("JSON.parse(localStorage.getItem('daybook.prefs')).tours.news") == 1, 'skipping counts as seen')
+    p.reload(); p.wait_for_timeout(1000)
+    check(not p.query_selector('#tour'), 'not shown again')
+    c.tap('.tab[data-view="plan"]'); c.tap('[data-action="tour-replay"]'); p.wait_for_timeout(150)
+    check(text(p, '#tourTitle') == 'Your month at a glance' and p.is_visible('#view-home'), 'Plan can replay the tour')
+    c.tap('[data-action="tour-end"]'); p.wait_for_timeout(150)
+    check(not p.query_selector('#tour') and p.is_visible('#view-plan'), 'skipping a replay returns to Plan')
+    return c.close()
+
+@test
+def tour_group_picker_tip(b):
+    seed = state({'setup': True, 'budget': 30000, 'groups': [{'id': 'gcar', 'name': 'New car', 'icon': '🚗'}]}, {})
+    seed['daybook.prefs'] = json.dumps({'tours': {'guide': 1, 'news': 1}})
+    c = Ctx(b, tours=True, seed=seed); p = c.go()
+    c.tap('.fab'); p.wait_for_timeout(700)
+    check(p.is_visible('#tourCard') and text(p, '#tourTitle') == 'Add it to a group' and not p.query_selector('.tour-step'), 'one-step tip on the group picker')
+    check(text(p, '[data-action="tour-next"]') == 'Got it' and not p.query_selector('[data-action="tour-end"]'), 'a single tip just says Got it')
+    tour_check(p, 390, 844, '.grp-pick', 'picker tip')
+    key = p.query_selector('.key[data-k="5"]').bounding_box()
+    check(p.evaluate(f"!!document.elementFromPoint({key['x'] + 5}, {key['y'] + 5}).closest('#tour')"), 'the page underneath is blocked while the tip shows')
+    p.screenshot(path=f'{SHOTS}/tour-picker-tip.png')
+    c.tap('[data-action="tour-next"]'); p.wait_for_timeout(150)
+    check(not p.query_selector('#tour') and p.is_visible('#saveBtn'), 'tip closes, sheet stays open')
+    c.tap('.key[data-k="5"]')
+    check(text(p, '#amtVal') == '5', 'keypad works after the tip')
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('.fab'); p.wait_for_timeout(700)
+    check(not p.query_selector('#tour'), 'the tip shows once')
+    return c.close()
+
 # ------------------------------------------------------------------ robustness
 @test
 def survives_corrupted_storage(b):
-    bad = {'daybook.v1': json.dumps({'settings': {'budget': 'abc', 'alertAt': 55, 'theme': 'neon', 'currency': 'XXX', 'limits': {'food': 'x', 'zzz': 5, 'fun': '200'}},
-                                     'months': {'2026-10': [{'a': '50', 'c': 'bogus', 'd': '2026-10-03'}, {'a': -1, 'd': 'x'}, None, 'str', {'a': 10, 'd': '2026-13-45'}], 'bad': 5}})}
+    bad = {'daybook.v1': json.dumps({'settings': {'budget': 'abc', 'alertAt': 55, 'theme': 'neon', 'currency': 'XXX', 'limits': {'food': 'x', 'zzz': 5, 'fun': '200'},
+                                                  'incomes': {'2026-13': 5, '2026-10': '40000', 'soon': 9, '2026-09': 'n/a'},
+                                                  'groups': [None, 'str', {'name': '   '}, {'id': 'g1', 'name': '  Car  ', 'icon': 'nope', 'target': 'abc', 'apart': 1}, {'id': 'g1', 'name': 'Dup'}]},
+                                     'months': {'2026-10': [{'a': '50', 'c': 'bogus', 'd': '2026-10-03', 'g': 5}, {'a': -1, 'd': 'x'}, None, 'str', {'a': 10, 'd': '2026-13-45'}], 'bad': 5}})}
     c = Ctx(b, seed=bad, clock=datetime.datetime(2026, 10, 20, 12, 0)); p = c.go()
     c.tap('.tab[data-view="history"]')
     rows = p.query_selector_all('#histList .row')
@@ -461,6 +820,11 @@ def survives_corrupted_storage(b):
     add(c, 10, 'food')
     s = store(p)
     check(list(s['months'].keys()) == ['2026-10'] and len(s['months']['2026-10']) == 2, 'storage rewritten clean after next change ' + str(list(s['months'].keys())))
+    check(all('g' not in e for e in s['months']['2026-10']), 'a broken group link is dropped')
+    check(s['settings']['incomes'] == {'2026-10': 40000}, 'only valid months keep an income: ' + str(s['settings']['incomes']))
+    check(s['settings']['groups'] == [{'id': 'g1', 'name': 'Car', 'icon': '🏷️', 'target': 0, 'apart': True, 'done': False}], 'groups repaired: ' + str(s['settings']['groups']))
+    c.tap('.tab[data-view="insights"]')
+    check('₹40,000 income for October' in text(p, '#insIncome'), 'repaired income used')
     errs = c.close()
     c2 = Ctx(b, seed={'daybook.v1': '{{{not json'}); p2 = c2.go()
     check(p2.is_visible('.welcome'), 'unreadable storage starts fresh')
@@ -485,15 +849,17 @@ def date_edges(b):
     return errs
 
 # ------------------------------------------------------------------ layout and iPhone
+SIZES = {'iphone-se-1': (320, 568), 'iphone-se': (375, 667), 'iphone-15': (393, 852), 'iphone-pro-max': (430, 932),
+         'se-homescreen': (375, 647), '15-homescreen': (393, 798), 'max-homescreen': (430, 873), '15-safari-bars': (393, 659),
+         'landscape': (852, 393), 'landscape-max': (932, 430), 'ipad': (820, 1180), 'ipad-landscape': (1180, 820),
+         'desktop': (1280, 800), 'laptop-small': (1366, 768)}
+MUST_FIT = ('iphone-se', 'iphone-15', 'iphone-pro-max', 'se-homescreen', '15-homescreen', 'max-homescreen', '15-safari-bars',
+            'landscape-max', 'ipad', 'ipad-landscape', 'desktop', 'laptop-small')
+
 @test
 def responsive_layouts(b):
     errs = []
-    sizes = {'iphone-se-1': (320, 568), 'iphone-se': (375, 667), 'iphone-15': (393, 852), 'iphone-pro-max': (430, 932),
-             'se-homescreen': (375, 647), '15-homescreen': (393, 798), 'max-homescreen': (430, 873), '15-safari-bars': (393, 659),
-             'landscape': (852, 393), 'landscape-max': (932, 430), 'ipad': (820, 1180), 'ipad-landscape': (1180, 820),
-             'desktop': (1280, 800), 'laptop-small': (1366, 768)}
-    must_fit = ('iphone-se', 'iphone-15', 'iphone-pro-max', 'se-homescreen', '15-homescreen', 'max-homescreen', '15-safari-bars',
-                'landscape-max', 'ipad', 'ipad-landscape', 'desktop', 'laptop-small')
+    sizes, must_fit = SIZES, MUST_FIT
     for name, (w, h) in sizes.items():
         mobile = name not in ('desktop', 'laptop-small')
         c = Ctx(b, mobile=mobile, viewport=(w, h)); p = c.go(); sample(c)
@@ -527,6 +893,57 @@ def responsive_layouts(b):
     return errs
 
 @test
+def layouts_with_groups(b):
+    # the add screen gains a group picker once groups exist; it must still fit, and the new screens must not overflow
+    today = datetime.datetime(2026, 11, 16, 10, 0)
+    groups = [{'id': 'gcar', 'name': 'New car', 'icon': '🚗', 'target': 800000, 'apart': True},
+              {'id': 'gtrip', 'name': 'Goa trip with college friends', 'icon': '🏖️', 'target': 0}]
+    months = {'2026-11': [ex('x1', 200000, 'other', '2026-11-03', 'Down payment', 'gcar'), ex('x2', 3200, 'travel', '2026-11-10', 'Flights', 'gtrip'),
+                          ex('x3', 450, 'food', '2026-11-15', 'Dinner')]}
+    settings = {'setup': True, 'budget': 44000, 'limits': {'food': 5000, 'rent': 12000}, 'incomes': {'2026-10': 65000}, 'groups': groups}
+    errs = []
+    for name, (w, h) in SIZES.items():
+        mobile = name not in ('desktop', 'laptop-small')
+        for theme in (['light', 'dark'] if name == 'iphone-15' else ['light']):
+            c = Ctx(b, mobile=mobile, viewport=(w, h), clock=today, seed=state(dict(settings, theme=theme), months)); p = c.go()
+            tag = f'{name}-dark' if theme == 'dark' else name
+            shots = name in ('iphone-se-1', 'iphone-15', 'landscape')
+            for v in ['home', 'history', 'plan']:
+                c.tap(f'.tab[data-view="{v}"]'); p.wait_for_timeout(150)
+                if v == 'history': c.tap('#histChips [data-cat="g:gcar"]')
+                if v == 'home': p.evaluate("document.querySelector('.cat-row[data-cat=\"g:gcar\"]').scrollIntoView({block: 'center'})")
+                if v == 'plan': p.evaluate("document.getElementById('planGroups').scrollIntoView()")
+                sw = p.evaluate('document.documentElement.scrollWidth')
+                check(sw <= w, f'{tag}/{v}: page wider than the screen ({sw} > {w})')
+                if shots: p.screenshot(path=f'{SHOTS}/groups-{tag}-{v}.png')
+            c.tap('.tab[data-view="home"]')
+            c.tap('.fab'); p.wait_for_timeout(450)
+            p.select_option('#grpSel', 'gtrip'); p.wait_for_timeout(50)
+            p.select_option('#grpSel', 'gcar')
+            for k in '200000': c.tap(f'.key[data-k="{k}"]')
+            note, pick = p.query_selector('#noteIn').bounding_box(), p.query_selector('#grpSel').bounding_box()
+            check(abs(note['y'] - pick['y']) < 1 and note['width'] >= 140, f'{tag}: note and group picker share a row ({note}, {pick})')
+            check(pick['x'] + pick['width'] <= p.query_selector('#sheet').bounding_box()['x'] + p.query_selector('#sheet').bounding_box()['width'], f'{tag}: picker inside the sheet')
+            box = p.query_selector('#saveBtn').bounding_box()
+            check(box['y'] + box['height'] <= h + 1, f'{tag}: Add button visible with a group picked')
+            if name in MUST_FIT:
+                fits = p.evaluate("(() => { const s = document.getElementById('sheet'); return s.scrollHeight <= s.clientHeight + 1 && s.scrollWidth <= s.clientWidth + 1; })()")
+                check(fits, f'{tag}: add screen with a group still fits without scrolling')
+            if shots: p.screenshot(path=f'{SHOTS}/groups-{tag}-add.png')
+            c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+            c.tap('.tab[data-view="plan"]')
+            c.tap('#planGroups [data-action="grp-edit"][data-id="gcar"]'); p.wait_for_timeout(450)
+            check(p.evaluate("(() => { const s = document.getElementById('sheet'); return s.scrollWidth <= s.clientWidth + 1; })()"), f'{tag}: group sheet has no sideways scroll')
+            if shots: p.screenshot(path=f'{SHOTS}/groups-{tag}-group-sheet.png')
+            c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+            c.tap('#view-plan [data-action="income-edit"]'); p.wait_for_timeout(450)
+            sheet = p.query_selector('#sheet').bounding_box(); save = p.query_selector('[data-action="income-save"]').bounding_box()
+            check(save['y'] + save['height'] <= sheet['y'] + sheet['height'] + 1, f'{tag}: income sheet fits')
+            if shots: p.screenshot(path=f'{SHOTS}/groups-{tag}-income-sheet.png')
+            errs += c.close()
+    return errs
+
+@test
 def offline_launch_with_service_worker(b):
     c = Ctx(b, sw=True); p = c.go(800); setup(c)
     add(c, 60, 'travel', 'Auto')
@@ -541,9 +958,23 @@ def offline_launch_with_service_worker(b):
 
 @test
 def ios_input_sizes_prevent_zoom(b):
-    c = Ctx(b); p = c.go(); setup(c)
+    sizes_js = """[...document.querySelectorAll('input,select,textarea')].filter(e => e.offsetParent !== null || e.id === 'dateIn').map(e => [e.id || e.className, parseFloat(getComputedStyle(e).fontSize)]).filter(x => x[1] < 16)"""
+    c = Ctx(b); p = c.go()
+    p.wait_for_selector('#wBudget', state='visible'); c.tap('[data-action="welcome-more"]')
+    small = p.evaluate(sizes_js)
+    check(len(p.query_selector_all('[data-wlimit]')) == 14, 'welcome amounts checked')
+    setup(c)
+    make_group(c, 'Trip')
+    c.tap('[data-action="grp-new"]'); p.wait_for_timeout(400)
+    small += p.evaluate(sizes_js)
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('[data-action="income-edit"]'); p.wait_for_timeout(400)
+    small += p.evaluate(sizes_js)
+    c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
+    c.tap('.tab[data-view="home"]')
     c.tap('.fab'); p.wait_for_timeout(400)
-    small = p.evaluate("""[...document.querySelectorAll('input,select,textarea')].filter(e => e.offsetParent !== null || e.id === 'dateIn').map(e => [e.id || e.className, parseFloat(getComputedStyle(e).fontSize)]).filter(x => x[1] < 16)""")
+    check(p.is_visible('#grpSel'), 'group picker checked')
+    small += p.evaluate(sizes_js)
     c.tap('[data-action="sheet-close"]'); p.wait_for_timeout(400)
     for v in ['history', 'plan']:
         c.tap(f'.tab[data-view="{v}"]')
@@ -613,6 +1044,25 @@ def cloud_two_devices(b):
     m = [v for k, v in db2.items() if '/m-' in k][0]['items']
     check({e['n'] for e in m} == {'Bus', 'Chai'}, 'second device appends, nothing lost')
     return c2.close()
+
+@test
+def cloud_syncs_groups_and_income(b):
+    when = datetime.datetime(2026, 11, 16, 10, 0)
+    c = Ctx(b, claude=True, clock=when); p = c.go(900); setup(c, '25000')
+    g = make_group(c, 'Goa trip', '🏖️', in_budget=False)
+    p.fill('#incomeIn', '40000'); p.dispatch_event('#incomeIn', 'change')
+    c.tap('.tab[data-view="home"]')
+    add(c, 900, 'travel', 'Bus to Goa', group=g['id']); p.wait_for_timeout(300)
+    raw = p.evaluate("localStorage.getItem('__mockdb')"); db = json.loads(raw)
+    st = db['data/users/u_test/settings']
+    check(st['groups'][0]['name'] == 'Goa trip' and st['groups'][0]['apart'] and st['incomes'] == {'2026-11': 40000}, 'settings doc carries groups and income')
+    check(db['data/users/u_test/m-2026-11']['items'][0]['g'] == g['id'], 'expense doc carries the group')
+    errs = c.close()
+    c2 = Ctx(b, claude=True, clock=when, seed={'__mockdb': raw}); p2 = c2.go(900)
+    check('₹900 this month · outside your budget' in text(p2, '#view-home') and '₹25,000' in text(p2, '.hero-num'), 'second device sees the group, kept out of the budget')
+    c2.tap('.tab[data-view="insights"]')
+    check('₹40,000 income for November' in text(p2, '#insIncome'), 'second device sees the income')
+    return errs + c2.close()
 
 # ------------------------------------------------------------------ run
 if __name__ == '__main__':

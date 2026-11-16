@@ -383,6 +383,73 @@ input.chip.on::-webkit-calendar-picker-indicator{filter:invert(1)}
 .w-tape span{height:100%}
 .w-tape span+span{border-left:2px solid var(--surface)}
 .w-tape i{position:absolute;top:0;bottom:0;left:78%;width:2px;background:var(--ink)}
+.w-more{display:flex;align-items:center;gap:12px;width:100%;margin-top:16px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--line);background:none;text-align:left;color:var(--ink)}
+.w-more>span{flex:1;min-width:0;display:grid;gap:2px}
+.w-more b{font-size:15px;font-weight:650}
+.w-more small{font-size:13.5px;color:var(--muted)}
+.w-more svg{flex:none;width:18px;height:18px;color:var(--muted);transition:transform .2s}
+.w-more[aria-expanded="true"]{border-style:solid}
+.w-more[aria-expanded="true"] svg{transform:rotate(90deg)}
+#wMore .help{margin-top:12px}
+#wMore .field-label{margin-top:18px}
+
+/* groups and income */
+.note-row{display:flex;gap:8px;margin-top:8px}
+.note-row .note{margin-top:0;flex:1;min-width:0}
+/* the picker has no height of its own: it stretches to match the note field at every breakpoint */
+.grp-pick{position:relative;display:flex;flex:0 1 auto;max-width:46%;min-width:0}
+.grp-pick select{width:100%;min-width:0;padding:0 30px 0 12px;border-radius:13px;border:1.5px solid var(--line);background:var(--surface-2);font-size:16px;font-weight:600;color:var(--ink-2);-webkit-appearance:none;appearance:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none}
+.grp-pick select:focus-visible{border-color:var(--ink)}
+.grp-pick select.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.grp-pick svg{position:absolute;right:10px;top:50%;width:15px;height:15px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.grp-pick select.on+svg{color:var(--bg)}
+.form-sheet .save{margin-top:22px}
+.text-in{display:block;width:100%;height:50px;padding:0 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--surface);outline:none;font-size:17px;font-weight:600}
+.text-in:focus{border-color:var(--ink)}
+.text-in.invalid{border-color:var(--bad)}
+.field-err{margin:6px 0 0;font-size:13.5px;font-weight:600;color:var(--bad)}
+.field-err:empty{display:none}
+.emoji-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.emoji-pick button{height:44px;padding:0;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-size:21px;line-height:1}
+.emoji-pick button[aria-checked="true"]{border-color:var(--ink);background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--ink)}
+.sw-row{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px;border-radius:14px;background:var(--surface-2)}
+.sw-txt{flex:1;min-width:0;display:grid;gap:3px}
+.sw-txt b{font-weight:650}
+.sw-txt span{font-size:13.5px;line-height:1.35;color:var(--ink-2)}
+.tgl{flex:none;position:relative;width:52px;height:32px;padding:0;border:0;border-radius:99px;background:var(--muted);transition:background .2s}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.tgl[aria-checked="true"]{background:var(--good)}
+.tgl[aria-checked="true"]::after{transform:translateX(20px)}
+.grp-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.fchip.gchip{border-style:dashed}
+.fchip.gchip[aria-pressed="true"]{border-style:solid}
+.gcard{margin:14px 0 0;padding:14px 16px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.gcard-top{display:flex;align-items:center;gap:12px}
+.gcard-name{flex:1;min-width:0;font:700 18px/1.2 var(--display);letter-spacing:-.015em;overflow-wrap:anywhere}
+.gcard-amt{margin:12px 0 0;font-size:14px;color:var(--ink-2)}
+.gcard-amt b{margin-right:5px;font:750 22px/1.1 var(--display);letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.gcard .bar{margin-top:10px}
+.gcard.over .bar i{background:var(--bad)}
+.gcard-note{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+.gcard.over .gcard-note{color:var(--bad);font-weight:600}
+.gcard .btn{margin-top:14px}
+.row .chev{flex:none;display:grid;color:var(--muted)}
+.chev svg{width:18px;height:18px}
+.row.done-row{opacity:.62}
+.apart-note{margin:12px 0 0;font-size:14px;color:var(--ink-2)}
+
+/* guided tours: no transitions, so the spotlight keeps up when the page scrolls */
+.tour{position:fixed;inset:0;z-index:70;touch-action:none}
+.tour.dim{background:var(--scrim)}
+.tour-hole{position:fixed;box-shadow:0 0 0 3px var(--brand),0 0 0 200vmax var(--scrim);pointer-events:none}
+.tour-card{position:fixed;top:0;left:0;width:min(340px,calc(100vw - 32px));padding:16px 16px 12px;border-radius:18px;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.tour-step{margin:0;font-size:12.5px;font-weight:650;color:var(--muted)}
+.tour-card h2{margin:3px 0 6px;font:700 18px/1.25 var(--display);letter-spacing:-.015em}
+.tour-text{margin:0;font-size:14.5px;line-height:1.45;color:var(--ink-2)}
+.tour-btns{display:flex;align-items:center;gap:8px;margin-top:14px}
+.tour-gap{flex:1}
+.tour-skip{background:none;border:0;padding:10px 2px;font-size:14.5px;font-weight:650;color:var(--muted)}
+.tour-btns .btn{min-height:42px;padding:0 16px}
 
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:14px;width:max-content;max-width:min(92vw,520px);padding:12px 12px 12px 18px;border-radius:14px;background:var(--ink);color:var(--bg);font-size:14.5px;box-shadow:var(--shadow);opacity:0;transform:translate(-50%,16px);pointer-events:none;transition:opacity .2s,transform .25s}
@@ -468,14 +535,19 @@ const PAYS = [{id:'upi', name:'UPI'}, {id:'cash', name:'Cash'}, {id:'card', name
 const PAY = Object.fromEntries(PAYS.map(p => [p.id, p.name]));
 const CURRENCIES = [['INR','₹  Indian rupee'],['USD','$  US dollar'],['EUR','€  Euro'],['GBP','£  British pound'],['AED','AED  UAE dirham'],['SGD','S$  Singapore dollar'],['AUD','A$  Australian dollar'],['CAD','C$  Canadian dollar'],['JPY','¥  Japanese yen']];
 const SAMPLE_LIMITS = {rent:12000, home:2000, groceries:6500, bills:1000, travel:3000, health:1500, food:5000, fun:3000, subs:500, shopping:3500, other:800, card:5000, invest:5000, savings:3000};
+// welcome asks about fixed payments first, since those are the amounts people already know
+const WELCOME_CATS = ['rent', 'card', 'home', 'bills', 'subs', 'groceries', 'travel', 'health', 'food', 'fun', 'shopping', 'other', 'invest', 'savings'];
+const GROUP_ICONS = ['🏷️','🚗','🏍️','🏠','🛋️','✈️','🏖️','💍','🎉','🎓','👶','🏥','💻','🛠️'];
 const VIEWS = ['home','history','insights','plan'];
 const HOSTED = !(window.claude && typeof window.claude.use === 'function');
 const DS_RE = /^\d{4}-\d{2}-\d{2}$/;
+const MK_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 const LS_KEY = 'daybook.v1';
 const PREFS_KEY = 'daybook.prefs';
 const ICON = {
   left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
   right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
   close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>'
 };
@@ -500,6 +572,9 @@ const num = v => { const n = parseFloat(String(v || '').replace(/[^0-9.]/g, ''))
 const clone = o => JSON.parse(JSON.stringify(o));
 const isSpend = c => (CAT[c] || CAT.other).group !== 'future';
 const catOf = id => CAT[id] || CAT.other;
+// "groups" here are the owner's own expense groups (a car, a trip), not the needs/wants GROUPS above
+const groupOf = id => (id && S.settings.groups.find(g => g.id === id)) || null;
+const isApart = e => { const g = groupOf(e.g); return !!(g && g.apart); };
 
 /* ---------- validation ---------- */
 function cleanItem(e){
@@ -507,6 +582,7 @@ function cleanItem(e){
   const a = Math.round(Number(e.a) * 100) / 100;
   if (!isFinite(a) || a <= 0 || a > 1e10 || typeof e.d !== 'string' || !DS_RE.test(e.d) || dsOf(parseDs(e.d)) !== e.d) return null;
   const o = {id: typeof e.id === 'string' && e.id ? e.id.slice(0, 48) : uid(), a, c: CAT[e.c] ? e.c : 'other', n: typeof e.n === 'string' ? e.n.slice(0, 80) : '', d: e.d, p: PAY[e.p] ? e.p : 'upi', t: Number(e.t) || 0};
+  if (typeof e.g === 'string' && e.g) o.g = e.g.slice(0, 48);
   if (e.s) o.s = 1;
   return o;
 }
@@ -519,6 +595,12 @@ function cleanMonths(m){
   }
   return out;
 }
+function cleanGroup(g){
+  if (!g || typeof g !== 'object') return null;
+  const name = typeof g.name === 'string' ? g.name.trim().slice(0, 40) : '';
+  if (!name) return null;
+  return {id: typeof g.id === 'string' && g.id ? g.id.slice(0, 48) : uid(), name, icon: GROUP_ICONS.indexOf(g.icon) >= 0 ? g.icon : GROUP_ICONS[0], target: num(g.target), apart: !!g.apart, done: !!g.done};
+}
 function cleanSettings(v){
   const o = Object.assign(defaultSettings(), v && typeof v === 'object' ? v : {});
   o.budget = num(o.budget); o.income = num(o.income);
@@ -528,11 +610,17 @@ function cleanSettings(v){
   const lim = {};
   if (o.limits && typeof o.limits === 'object') for (const k of Object.keys(o.limits)) { const n = num(o.limits[k]); if (CAT[k] && n) lim[k] = n; }
   o.limits = lim; o.setup = !!o.setup;
+  const inc = {};
+  if (o.incomes && typeof o.incomes === 'object') for (const k of Object.keys(o.incomes)) { const n = num(o.incomes[k]); if (MK_RE.test(k) && n) inc[k] = n; }
+  o.incomes = inc;
+  const groups = [], ids = new Set();
+  if (Array.isArray(o.groups)) for (const x of o.groups) { const g = cleanGroup(x); if (g && !ids.has(g.id)) { ids.add(g.id); groups.push(g); } }
+  o.groups = groups.slice(0, 60);
   return o;
 }
 
 /* ---------- state ---------- */
-const defaultSettings = () => ({setup:false, currency:'INR', budget:0, income:0, alertAt:80, limits:{}, theme:'auto'});
+const defaultSettings = () => ({setup:false, currency:'INR', budget:0, income:0, incomes:{}, alertAt:80, limits:{}, groups:[], theme:'auto'});
 let S = {settings: defaultSettings(), months: {}};
 let view = 'home';
 let insMonth = todayStr().slice(0, 7);
@@ -584,10 +672,15 @@ function typedDisplay(s){
 function allItems(){ return Object.values(S.months).flat(); }
 function findExp(id){ for (const k in S.months) { const e = S.months[k].find(x => x.id === id); if (e) return e; } return null; }
 function stats(k){
-  const items = S.months[k] || [];
-  const byCat = {}; let spent = 0, saved = 0;
-  for (const e of items) { byCat[e.c] = (byCat[e.c] || 0) + e.a; if (isSpend(e.c)) spent += e.a; else saved += e.a; }
-  return {items, byCat, spent, saved};
+  const all = S.months[k] || [], items = [];
+  const byCat = {}; let spent = 0, saved = 0, apart = 0;
+  // groups kept out of the budget don't count toward spending, limits or the charts
+  for (const e of all) {
+    if (isApart(e)) { apart += e.a; continue; }
+    items.push(e);
+    byCat[e.c] = (byCat[e.c] || 0) + e.a; if (isSpend(e.c)) spent += e.a; else saved += e.a;
+  }
+  return {items, all, byCat, spent, saved, apart};
 }
 function addExpense(e){
   const k = e.d.slice(0, 7);
@@ -599,6 +692,7 @@ function updateExpense(id, patch){
   const old = findExp(id); if (!old) return;
   const oldK = old.d.slice(0, 7);
   const nu = Object.assign({}, old, patch);
+  if (!nu.g) delete nu.g;
   const newK = nu.d.slice(0, 7);
   S.months[oldK] = S.months[oldK].filter(x => x.id !== id);
   (S.months[newK] || (S.months[newK] = [])).push(nu);
@@ -610,6 +704,38 @@ function deleteExpense(id){
   S.months[k] = S.months[k].filter(x => x.id !== id);
   persistMonth(k);
   return e;
+}
+function groupTotal(id, except){ return sum(allItems().filter(e => e.g === id && e.id !== except), e => e.a); }
+function groupInfo(g){
+  const tot = groupTotal(g.id);
+  return {tot, over: !!g.target && tot > g.target, pct: g.target ? Math.min(100, tot / g.target * 100) : 0};
+}
+// Each month keeps its own income. A month without one uses the latest earlier month's.
+function incomeFor(k, skipOwn){
+  const inc = S.settings.incomes;
+  if (!skipOwn && inc[k]) return {v: inc[k], own: true, from: k};
+  const prev = Object.keys(inc).filter(m => m < k).sort().pop();
+  if (prev) return {v: inc[prev], own: false, from: prev};
+  // the single income saved before incomes were per month applies until the first per-month edit
+  if (!Object.keys(inc).length && S.settings.income) return {v: S.settings.income, own: false, from: 'usual'};
+  return {v: 0, own: false, from: null};
+}
+function setIncome(k, v){
+  const inc = S.settings.incomes;
+  if (S.settings.income) {
+    // first per-month edit: the old single income stays with the months before this one
+    const first = Object.keys(S.months).sort()[0];
+    if (!Object.keys(inc).length && first && first < k) inc[first] = S.settings.income;
+    S.settings.income = 0;
+  }
+  if (v) inc[k] = v; else delete inc[k];
+}
+const carriedPhrase = r => r.from === 'usual' ? `your usual ${money(r.v)}` : `${monthName(r.from, {month:'long'})}’s ${money(r.v)}`;
+function incomeNote(k){
+  const r = incomeFor(k), c = incomeFor(k, true), m = monthName(k, {month:'long'});
+  if (r.own) return `Saved for ${m} only. Earlier months keep their own amounts, and ${monthName(shiftMonth(k, 1), {month:'long'})} starts with this one until you change it.`;
+  if (c.v) return `Using ${carriedPhrase(c)} until you change it. Type a new amount if ${m}’s income is different.`;
+  return 'Optional. Each month keeps its own amount, and Insights checks your spending against the 50/30/20 guide.';
 }
 
 /* ---------- persistence: account (db) with browser fallback ---------- */
@@ -780,18 +906,20 @@ function renderCurrent(){
   else if (view === 'history') renderHistory();
   else if (view === 'insights') renderInsights();
   else renderPlan();
+  if (tour) requestAnimationFrame(placeTour);
 }
 
 /* ---------- shared bits ---------- */
 function rowHtml(e, withDate){
-  const c = catOf(e.c);
+  const c = catOf(e.c), g = groupOf(e.g);
   const subParts = [];
   if (e.n) subParts.push(c.name);
   if (withDate) subParts.push(dayLabel(e.d));
   if (e.p && PAY[e.p]) subParts.push(PAY[e.p]);
+  const sub = (g ? `${g.icon} ${g.name} · ` : '') + subParts.join(', ');
   return `<button class="row" data-action="edit" data-id="${esc(e.id)}">
     <span class="ico" style="--c:${c.color}" aria-hidden="true">${c.icon}</span>
-    <span class="row-main"><span class="row-title">${esc(e.n || c.name)}</span><span class="row-sub">${esc(subParts.join(', '))}</span></span>
+    <span class="row-main"><span class="row-title">${esc(e.n || c.name)}</span><span class="row-sub">${esc(sub)}</span></span>
     <span class="row-amt${c.group === 'future' ? ' fut' : ''}">${money(e.a)}</span>
   </button>`;
 }
@@ -818,8 +946,8 @@ function computeQuick(){
   const map = new Map();
   for (const e of allItems()) {
     if (e.d < since || !e.n) continue;
-    const key = e.c + '|' + e.n.trim().toLowerCase() + '|' + e.a;
-    const m = map.get(key) || {c:e.c, n:e.n.trim(), a:e.a, p:e.p, count:0, last:''};
+    const key = e.c + '|' + e.n.trim().toLowerCase() + '|' + e.a + '|' + (e.g || '');
+    const m = map.get(key) || {c:e.c, n:e.n.trim(), a:e.a, p:e.p, g:e.g || '', count:0, last:''};
     m.count++; if (e.d > m.last) m.last = e.d;
     map.set(key, m);
   }
@@ -921,6 +1049,11 @@ function renderHome(){
   const catsHtml = `<section class="sec"><div class="sec-head"><h2>This month by category</h2><button class="link-btn" data-action="goto" data-view="plan">Edit limits</button></div>
     ${rows.length ? `<div class="cats">${rows.join('')}</div>` : `<div class="empty"><p>Categories appear here as you spend. Set limits in Plan to get warned before one runs over.</p></div>`}</section>`;
 
+  // groups
+  const liveGroups = S.settings.groups.filter(g => !g.done);
+  const groupsHtml = liveGroups.length ? `<section class="sec"><div class="sec-head"><h2>Groups</h2><button class="link-btn" data-action="plan-groups">Manage</button></div>
+    <div class="cats">${liveGroups.map(g => groupRowHtml(g, k)).join('')}</div></section>` : '';
+
   // recent
   const recent = sortedItems(allItems()).slice(0, 6);
   const recentHtml = `<section class="sec"><div class="sec-head"><h2>Recent</h2>${recent.length ? '<button class="link-btn" data-action="goto" data-view="history">See all</button>' : ''}</div>
@@ -939,7 +1072,31 @@ function renderHome(){
     ${alertsHtml}
     ${quickHtml}
     ${catsHtml}
+    ${groupsHtml}
     ${recentHtml}`;
+}
+function groupRowHtml(g, k){
+  const {tot, over, pct} = groupInfo(g);
+  const month = sum((S.months[k] || []).filter(e => e.g === g.id), e => e.a);
+  const notes = [g.target ? (over ? `${money(tot - g.target)} over plan` : `${money(g.target - tot)} left of plan`) : `${money(month)} this month`];
+  if (g.apart) notes.push('outside your budget');
+  return `<button class="cat-row ${g.target ? 'r3' : 'r2'}${over ? ' over' : ''}" data-action="hist-filter" data-cat="g:${esc(g.id)}" style="--c:var(--brand)" aria-label="Show ${esc(g.name)} expenses">
+    <span class="ico" aria-hidden="true">${g.icon}</span><span class="cat-name">${esc(g.name)}</span>
+    <span class="cat-amt"><b>${money(tot)}</b>${g.target ? ` of ${money(g.target)}` : ''}</span>
+    ${g.target ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}<span class="cat-note">${notes.join(' · ')}</span>
+  </button>`;
+}
+function groupCardHtml(g){
+  const {tot, over, pct} = groupInfo(g);
+  const note = [g.target ? (over ? `${money(tot - g.target)} over the plan.` : `${money(g.target - tot)} left of the plan.`) : '',
+    g.apart ? 'Kept out of your monthly budget and category limits.' : 'Counts toward your monthly budget.', g.done ? 'Marked as finished.' : ''].filter(Boolean).join(' ');
+  return `<div class="gcard${over ? ' over' : ''}" style="--c:var(--brand)">
+    <div class="gcard-top"><span class="ico" aria-hidden="true">${g.icon}</span><span class="gcard-name">${esc(g.name)}</span><button class="link-btn" data-action="grp-edit" data-id="${esc(g.id)}">Edit</button></div>
+    <p class="gcard-amt"><b>${money(tot)}</b>${g.target ? `of ${money(g.target)} planned` : 'in total'}</p>
+    ${g.target ? `<div class="bar"><i style="width:${pct}%"></i></div>` : ''}
+    <p class="gcard-note">${esc(note)}</p>
+    ${g.done ? '' : `<button class="btn primary wide" data-action="add-grp" data-id="${esc(g.id)}">Add to ${esc(g.name)}</button>`}
+  </div>`;
 }
 
 /* ---------- history ---------- */
@@ -948,32 +1105,41 @@ function renderHistory(){
   if (!el.dataset.built) {
     el.innerHTML = `<h1 class="page-title">History</h1>
       <div class="search-wrap">${ICON.search}<input class="search" id="histSearch" type="search" placeholder="Search notes or amounts" autocomplete="off" aria-label="Search expenses"></div>
-      <div class="fchips" id="histChips" role="group" aria-label="Filter by category"></div>
+      <div class="fchips" id="histChips" role="group" aria-label="Filter by group or category"></div>
+      <div id="histGroup"></div>
       <p class="hist-sum" id="histSum"></p>
       <div id="histList"></div>`;
     el.dataset.built = '1';
   }
-  const used = new Set(allItems().map(e => e.c));
+  const all = allItems();
+  const used = new Set(all.map(e => e.c)), usedG = new Set(all.map(e => e.g).filter(Boolean));
   const chipCats = CATS.filter(c => used.has(c.id));
-  if (histCat !== 'all' && !used.has(histCat)) histCat = 'all';
+  const chipGroups = S.settings.groups.filter(g => !g.done || usedG.has(g.id));
+  const valid = histCat.indexOf('g:') === 0 ? chipGroups.some(g => 'g:' + g.id === histCat) : used.has(histCat);
+  if (histCat !== 'all' && !valid) histCat = 'all';
   $('#histChips').innerHTML = `<button class="fchip" data-action="hist-cat" data-cat="all" aria-pressed="${histCat === 'all'}">All</button>` +
+    chipGroups.map(g => `<button class="fchip gchip" data-action="hist-cat" data-cat="g:${esc(g.id)}" aria-pressed="${histCat === 'g:' + g.id}"><span aria-hidden="true">${g.icon}</span>${esc(g.name)}</button>`).join('') +
     chipCats.map(c => `<button class="fchip" data-action="hist-cat" data-cat="${c.id}" aria-pressed="${histCat === c.id}"><span aria-hidden="true">${c.icon}</span>${esc(c.short)}</button>`).join('');
   renderHistList();
 }
 function renderHistList(){
   const list = $('#histList'); if (!list) return;
   const q = histQuery.trim().toLowerCase();
+  const gid = histCat.indexOf('g:') === 0 ? histCat.slice(2) : null, fg = groupOf(gid);
   let items = allItems();
   const total = items.length;
-  if (histCat !== 'all') items = items.filter(e => e.c === histCat);
-  if (q) items = items.filter(e => (e.n || '').toLowerCase().includes(q) || catOf(e.c).name.toLowerCase().includes(q) || String(e.a).includes(q) || (PAY[e.p] || '').toLowerCase() === q);
+  if (gid) items = items.filter(e => e.g === gid);
+  else if (histCat !== 'all') items = items.filter(e => e.c === histCat);
+  if (q) items = items.filter(e => { const g = groupOf(e.g); return (e.n || '').toLowerCase().includes(q) || catOf(e.c).name.toLowerCase().includes(q) || String(e.a).includes(q) || (PAY[e.p] || '').toLowerCase() === q || (!!g && g.name.toLowerCase().includes(q)); });
   items = sortedItems(items);
   const filtered = histCat !== 'all' || q;
+  $('#histGroup').innerHTML = fg ? groupCardHtml(fg) : '';
   $('#histSum').textContent = filtered && items.length ? `${plural(items.length, 'expense')}, ${money(sum(items, e => e.a))} in total` : '';
+  if (fg && !q && !items.length) { list.innerHTML = `<div class="empty"><p>Nothing in ${esc(fg.name)} yet. When you add an expense, choose the group next to the note.</p></div>`; return; }
   if (!total) { list.innerHTML = `<div class="empty"><p>Nothing here yet. Every expense you log shows up here, newest first.</p><button class="btn primary" data-action="add">Add an expense</button></div>`; return; }
   if (!items.length) { list.innerHTML = `<div class="empty"><p>No expenses match ${q ? `“${esc(histQuery.trim())}”` : 'this filter'}.</p></div>`; return; }
   const mTot = {}, dTot = {};
-  const counts = e => isSpend(e.c) || histCat === e.c;
+  const counts = e => !!gid || isSpend(e.c) || histCat === e.c;
   for (const e of items) { if (!counts(e)) continue; const k = e.d.slice(0, 7); mTot[k] = (mTot[k] || 0) + e.a; dTot[e.d] = (dTot[e.d] || 0) + e.a; }
   let html = '', curM = '', curD = '';
   const shown = items.slice(0, histLimit);
@@ -1003,7 +1169,7 @@ function renderInsights(){
   const elapsed = isCur ? +t.slice(8) : D;
   const prevK = shiftMonth(k, -1), prev = stats(prevK);
   const head = `<div class="ins-head"><button class="icon-btn" data-action="ins-prev" aria-label="Previous month">${ICON.left}</button><h1 class="page-title">${esc(monthName(k))}</h1><button class="icon-btn" data-action="ins-next" aria-label="Next month"${k >= curK ? ' disabled' : ''}>${ICON.right}</button></div>`;
-  if (!st.items.length) {
+  if (!st.all.length) {
     el.innerHTML = head + `<div class="empty"><p>Nothing logged in ${esc(monthName(k, {month:'long'}))}${isCur ? ' yet. Charts fill in as you add expenses.' : '.'}</p>${isCur ? '<button class="btn primary" data-action="add">Add an expense</button>' : ''}</div>`;
     return;
   }
@@ -1022,6 +1188,9 @@ function renderInsights(){
     ${kpi3}
     <div class="kpi"><span class="k">Versus ${esc(monthName(prevK, {month:'long'}))}</span><b>${vsPrev === null ? '–' : `${vsPrev > 0 ? '+' : ''}${Math.round(vsPrev)}%`}</b><span class="s ${vsPrev === null ? '' : vsPrev > 0 ? 'bad' : 'good'}">${vsPrev === null ? 'no data for that month' : `${money(prev.spent)} spent then`}</span></div>
   </div>`;
+  const apartBy = {};
+  for (const e of st.all) if (isApart(e)) apartBy[e.g] = (apartBy[e.g] || 0) + e.a;
+  const apartHtml = st.apart ? `<p class="apart-note">Not counted on this page: ${Object.keys(apartBy).map(id => { const g = groupOf(id); return `${money(apartBy[id])} for ${g.icon} ${esc(g.name)}`; }).join(', ')}, kept out of your budget.</p>` : '';
 
   // donut
   const parts = CATS.filter(c => isSpend(c.id) && st.byCat[c.id] > 0).map(c => ({c, v: st.byCat[c.id]})).sort((a, b) => b.v - a.v);
@@ -1060,7 +1229,7 @@ function renderInsights(){
   const g = {needs:0, wants:0, debt:0, future:0};
   for (const e of st.items) g[catOf(e.c).group] += e.a;
   const out = g.needs + g.wants + g.debt + g.future;
-  const inc = +S.settings.income || 0;
+  const ir = incomeFor(k), inc = ir.v, mLong = monthName(k, {month:'long'});
   const sc = Math.max(inc, out) || 1;
   const gkeys = ['needs', 'wants', 'debt', 'future'].filter(x => g[x] > 0);
   const splitBar = `<div class="split" role="img" aria-label="Needs, wants, card and EMI, and savings">${gkeys.map(x => `<span style="width:${g[x] / sc * 100}%;background:${GROUPS[x].color}"></span>`).join('')}${inc > out ? `<span class="rest" style="width:${(inc - out) / sc * 100}%"></span>` : ''}</div>`;
@@ -1072,8 +1241,9 @@ function renderInsights(){
     const line = (label, p, ok, target) => `<p><span>${label}: ${Math.round(p)}% of income</span><span class="${ok ? 'ok' : 'no'}">${target}</span></p>`;
     guide = `<div class="guide">${line('Needs and EMIs', pN, pN <= 50, 'guide: up to 50%')}${line('Wants', pW, pW <= 30, 'guide: up to 30%')}${line('Saved and invested', pF, isCur ? true : pF >= 20, 'guide: at least 20%')}</div>`;
   }
-  const splitHtml = `<section class="sec"><div class="sec-head"><h2>Needs, wants and the future</h2></div>
-    <p class="sec-note">${inc ? `Shares of your ${money(inc)} monthly income, checked against the 50/30/20 guide.` : 'Add your monthly income in Plan to check this against the 50/30/20 guide.'}</p>
+  const incFrom = ir.own || !inc ? '' : ir.from === 'usual' ? ', your usual amount' : `, carried over from ${monthName(ir.from, {month:'long'})}`;
+  const splitHtml = `<section class="sec" id="insIncome"><div class="sec-head"><h2>Needs, wants and the future</h2><button class="link-btn" data-action="income-edit" data-k="${k}">${inc ? 'Change income' : 'Add income'}</button></div>
+    <p class="sec-note">${inc ? `Shares of your ${money(inc)} income for ${esc(mLong)}${esc(incFrom)}, checked against the 50/30/20 guide.` : `Add your income for ${esc(mLong)} to check it against the 50/30/20 guide.`}</p>
     ${splitBar}${splitRows}${guide}</section>`;
 
   // trend
@@ -1104,7 +1274,7 @@ function renderInsights(){
   const top = st.items.filter(e => isSpend(e.c)).sort((a, b) => b.a - a.a).slice(0, 5);
   const topHtml = top.length ? `<section class="sec"><div class="sec-head"><h2>Biggest expenses</h2></div><div class="list">${top.map(e => rowHtml(e, true)).join('')}</div></section>` : '';
 
-  el.innerHTML = head + kpis + donutHtml + dayHtml + splitHtml + trendHtml + weekHtml + payHtml + topHtml;
+  el.innerHTML = head + kpis + apartHtml + donutHtml + dayHtml + splitHtml + trendHtml + weekHtml + payHtml + topHtml;
 }
 
 /* ---------- plan ---------- */
@@ -1123,6 +1293,15 @@ function renderPlan(){
       <span class="lim-main"><span class="lim-name">${esc(c.name)}</span><span class="lim-sub">${esc(c.hint)}</span>${sp ? `<span class="lim-sub lim-sp">${money(sp)} this month</span>` : ''}</span>
       <label class="money-input sm"><span>${esc(sym)}</span><input data-limit="${c.id}" inputmode="decimal" autocomplete="off" placeholder="${c.group === 'future' ? 'No goal' : 'No limit'}" value="${s.limits[c.id] ? grp(s.limits[c.id]) : ''}" aria-label="${esc(c.name)} ${c.group === 'future' ? 'monthly goal' : 'monthly limit'}"></label></div>`;
   };
+  const ir = incomeFor(k), ic = incomeFor(k, true), prevK = shiftMonth(k, -1);
+  const groupRow = g => {
+    const {tot} = groupInfo(g);
+    const sub = [g.target ? `${money(tot)} of ${money(g.target)}` : `${money(tot)} so far`, g.apart ? 'outside budget' : 'counts in budget'];
+    if (g.done) sub.push('finished');
+    return `<button class="row${g.done ? ' done-row' : ''}" data-action="grp-edit" data-id="${esc(g.id)}"><span class="ico" style="--c:var(--brand)" aria-hidden="true">${g.icon}</span>
+      <span class="row-main"><span class="row-title">${esc(g.name)}</span><span class="row-sub">${esc(sub.join(' · '))}</span></span><span class="chev" aria-hidden="true">${ICON.right}</span></button>`;
+  };
+  const groupsSorted = s.groups.filter(g => !g.done).concat(s.groups.filter(g => g.done));
   const files = canSaveFiles(), hasData = allItems().length > 0;
   const lastBackup = loadPrefs().lastBackup;
   const statusTxt = Cloud.ready ? 'Saved privately to your Claude account, so it follows you to any device where you open this page.'
@@ -1133,9 +1312,10 @@ function renderPlan(){
       <h2>Monthly spending budget</h2>
       <p class="help">Everything you spend counts toward this, including card bills and EMIs. Savings and investments are tracked as goals instead.</p>
       <div class="money-input"><span>${esc(sym)}</span><input id="budgetIn" inputmode="decimal" autocomplete="off" placeholder="30,000" value="${s.budget ? grp(s.budget) : ''}" aria-label="Monthly spending budget"></div>
-      <label class="field-label" for="incomeIn">Monthly income</label>
-      <div class="money-input"><span>${esc(sym)}</span><input id="incomeIn" inputmode="decimal" autocomplete="off" placeholder="Optional" value="${s.income ? grp(s.income) : ''}"></div>
-      <p class="help" style="margin-top:6px">Insights uses this to check your month against the 50/30/20 guide.</p>
+      <label class="field-label" for="incomeIn">Income for ${esc(monthName(k, {month:'long'}))}</label>
+      <div class="money-input"><span>${esc(sym)}</span><input id="incomeIn" inputmode="decimal" autocomplete="off" placeholder="${ic.v ? grp(ic.v) : 'Optional'}" value="${ir.own ? grp(ir.v) : ''}"></div>
+      <p class="help" id="incNote" style="margin-top:6px">${esc(incomeNote(k))}</p>
+      <button class="link-btn" data-action="income-edit" data-k="${prevK}">${incomeFor(prevK).own ? 'Change' : 'Set'} ${esc(monthName(prevK, {month:'long'}))}’s income</button>
     </section>
     <section class="block">
       <h2>Warn me when a category reaches</h2>
@@ -1154,6 +1334,12 @@ function renderPlan(){
       <h2>Monthly goals</h2>
       <p class="help">How much you want to put aside each month. Reaching these is a good thing.</p>
       <div>${futCats.map(limRow).join('')}</div>
+    </section>
+    <section class="block" id="planGroups">
+      <h2>Groups</h2>
+      <p class="help">Keep related expenses together, like everything for a new car or a trip, and see their total in one place. Each expense still keeps its category.</p>
+      ${groupsSorted.length ? `<div class="list">${groupsSorted.map(groupRow).join('')}</div>` : ''}
+      <button class="btn" data-action="grp-new" style="margin-top:8px">New group</button>
     </section>
     <section class="block">
       <h2>Appearance</h2>
@@ -1174,6 +1360,11 @@ function renderPlan(){
       </div>
       <p class="fine">${files ? (lastBackup ? `Last backup: ${esc(dayLabel(lastBackup))}. ` : 'No backup yet. ') : ''}A backup file brings everything back on a new phone or browser, without duplicating entries. The CSV opens in Excel or Google Sheets.</p>
       <p class="fine">On a keyboard, press N to add an expense.</p>
+    </section>
+    <section class="block">
+      <h2>Help</h2>
+      <p class="help">A short tour of the main screens, including monthly income and groups.</p>
+      <button class="btn" data-action="tour-replay">Take the tour</button>
     </section>`;
   updateLimSum();
 }
@@ -1200,15 +1391,21 @@ function openSheet(o){
   const prefs = loadPrefs();
   if (o.mode === 'edit') {
     const e = findExp(o.id); if (!e) return;
-    sh = {mode:'edit', id:e.id, amount: Number.isInteger(e.a) ? String(e.a) : e.a.toFixed(2), cat:e.c, note:e.n || '', date:e.d, pay:e.p || 'upi'};
+    sh = {mode:'edit', id:e.id, amount: Number.isInteger(e.a) ? String(e.a) : e.a.toFixed(2), cat:e.c, note:e.n || '', date:e.d, pay:e.p || 'upi', grp: groupOf(e.g) ? e.g : ''};
   } else {
-    sh = {mode:'add', amount:'', cat: o.cat || (CAT[prefs.lastCat] ? prefs.lastCat : 'food'), note:'', date:todayStr(), pay: PAY[prefs.lastPay] ? prefs.lastPay : 'upi'};
+    // a new expense starts ungrouped unless opened from a group, so everyday spending never lands in one by accident
+    const g = groupOf(o.grp);
+    sh = {mode:'add', amount:'', cat: o.cat || (CAT[prefs.lastCat] ? prefs.lastCat : 'food'), note:'', date:todayStr(), pay: PAY[prefs.lastPay] ? prefs.lastPay : 'upi', grp: g && !g.done ? g.id : ''};
   }
   renderSheet(); showSheet();
+  // the first time the group picker appears, point it out once the sheet has slid up
+  if ($('#grpSel') && !seenTour('pick')) setTimeout(() => { if (sh && (sh.mode === 'add' || sh.mode === 'edit') && $('#grpSel') && !tour) startTour('pick'); }, 380);
 }
 function renderSheet(){
   const t = todayStr(), y = shiftDay(t, -1);
   const order = catOrder();
+  const gOpts = S.settings.groups.filter(g => !g.done || g.id === sh.grp);
+  const grpPick = gOpts.length ? `<label class="grp-pick"><select id="grpSel" aria-label="Group"><option value="">No group</option>${gOpts.map(g => `<option value="${esc(g.id)}">${g.icon} ${esc(g.name)}</option>`).join('')}</select>${ICON.down}</label>` : '';
   $('#sheet').innerHTML = `<div class="grab" aria-hidden="true"></div>
     <div class="sheet-head"><h2 id="sheetTitle">${sh.mode === 'edit' ? 'Edit expense' : 'Add expense'}</h2>
       ${sh.mode === 'edit' ? '<button class="text-btn" data-action="sheet-delete">Delete</button>' : ''}
@@ -1217,7 +1414,7 @@ function renderSheet(){
     <div class="amount" id="amtBox"><span class="cur">${esc(curSym())}</span><span id="amtVal" aria-live="polite"></span><span class="caret" aria-hidden="true"></span></div>
     <p class="hint" id="sheetHint" aria-live="polite"></p>
     <div class="cat-pick" id="catPick" role="radiogroup" aria-label="Category">${order.map(c => `<button class="cp" role="radio" data-action="pick-cat" data-cat="${c.id}" style="--c:${c.color}" aria-label="${esc(c.name)}"><span class="ico" aria-hidden="true">${c.icon}</span><span class="cp-name" aria-hidden="true">${esc(c.short)}</span></button>`).join('')}</div>
-    <input class="note" id="noteIn" maxlength="80" placeholder="What was it for? (optional)" value="${esc(sh.note)}" autocomplete="off" enterkeyhint="done" aria-label="Note">
+    <div class="note-row"><input class="note" id="noteIn" maxlength="80" placeholder="What was it for?${grpPick ? '' : ' (optional)'}" value="${esc(sh.note)}" autocomplete="off" enterkeyhint="done" aria-label="Note">${grpPick}</div>
     <div class="opts">
       <div class="chips" role="radiogroup" aria-label="Date">
         <button class="chip" role="radio" data-action="pick-date" data-v="${t}">Today</button>
@@ -1235,10 +1432,17 @@ function renderSheet(){
 function sheetHint(){
   const amt = num(sh.amount);
   const c = catOf(sh.cat), k = sh.date.slice(0, 7), st = stats(k);
+  const g = groupOf(sh.grp);
+  if (g && g.apart) {
+    const gt = groupTotal(g.id, sh.id) + amt;
+    if (g.target && gt > g.target) return {lvl:'over', text:`${money(gt - g.target)} past the ${money(g.target)} ${g.name} plan. Outside your budget.`};
+    if (g.target) return {lvl:'', text:`${money(g.target - gt)} left of the ${money(g.target)} ${g.name} plan. Outside your budget.`};
+    return {lvl:'', text:`${money(gt)} in ${g.name}${amt ? ' with this' : ' so far'}. Outside your budget.`};
+  }
   let catSpent = st.byCat[sh.cat] || 0, tot = st.spent;
   if (sh.mode === 'edit') {
     const o = findExp(sh.id);
-    if (o && o.d.slice(0, 7) === k) { if (o.c === sh.cat) catSpent -= o.a; if (isSpend(o.c)) tot -= o.a; }
+    if (o && o.d.slice(0, 7) === k && !isApart(o)) { if (o.c === sh.cat) catSpent -= o.a; if (isSpend(o.c)) tot -= o.a; }
   }
   const lim = +S.settings.limits[sh.cat] || 0, B = +S.settings.budget || 0;
   const newCat = catSpent + amt, newTot = tot + (isSpend(sh.cat) ? amt : 0);
@@ -1259,7 +1463,7 @@ function sheetHint(){
   return {lvl, text: msgs.join(' ')};
 }
 function updateSheet(){
-  if (!sh || sh.mode === 'welcome') return;
+  if (!sh || (sh.mode !== 'add' && sh.mode !== 'edit')) return;
   const box = $('#amtBox');
   $('#amtVal').textContent = typedDisplay(sh.amount);
   box.classList.toggle('is-zero', !sh.amount);
@@ -1269,6 +1473,7 @@ function updateSheet(){
   document.querySelectorAll('[data-action="pick-pay"]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === sh.pay)));
   document.querySelectorAll('[data-action="pick-date"]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === sh.date)));
   const di = $('#dateIn'); if (di) { di.value = sh.date; di.classList.toggle('on', sh.date !== todayStr() && sh.date !== shiftDay(todayStr(), -1)); }
+  const gs = $('#grpSel'); if (gs) { gs.value = sh.grp; gs.classList.toggle('on', !!sh.grp); }
   const btn = $('#saveBtn');
   const amt = num(sh.amount);
   btn.disabled = !amt;
@@ -1308,9 +1513,14 @@ function closeSheet(){
   if (lastFocus && document.contains(lastFocus)) { try { lastFocus.focus({preventScroll:true}); } catch(e) {} }
 }
 function afterAddMsg(e){
-  const c = catOf(e.c), k = e.d.slice(0, 7), st = stats(k);
+  const c = catOf(e.c), k = e.d.slice(0, 7), st = stats(k), g = groupOf(e.g);
+  if (g) {
+    const tot = groupTotal(g.id);
+    if (g.target && tot > g.target && tot - e.a <= g.target) return `Added. ${g.name} is now ${money(tot - g.target)} past its ${money(g.target)} plan.`;
+    if (g.apart) return `Added ${money(e.a)} to ${g.name}, outside your monthly budget.`;
+  }
   const lim = +S.settings.limits[e.c] || 0, sp = st.byCat[e.c] || 0, B = +S.settings.budget || 0;
-  let msg = `Added ${money(e.a)} to ${c.name}.`;
+  let msg = g ? `Added ${money(e.a)} to ${c.name}, in ${g.name}.` : `Added ${money(e.a)} to ${c.name}.`;
   if (c.group !== 'future') {
     if (B && st.spent > B && st.spent - e.a <= B) msg = `Added. You’re now ${money(st.spent - B)} over your monthly budget.`;
     else if (lim && sp > lim) msg = `Added. ${c.name} is ${money(sp - lim)} over its limit.`;
@@ -1323,14 +1533,16 @@ function saveSheet(){
   if (!a) { const box = $('#amtBox'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); return; }
   const note = ($('#noteIn').value || '').trim().slice(0, 80);
   const date = sh.date > todayStr() ? todayStr() : sh.date;
+  const g = groupOf(sh.grp) ? sh.grp : '';
   if (sh.mode === 'add') {
     const e = {id: uid(), a, c: sh.cat, n: note, d: date, p: sh.pay, t: Date.now()};
+    if (g) e.g = g;
     savePrefs({lastCat: sh.cat, lastPay: sh.pay});
     addExpense(e);
     closeSheet(); renderCurrent();
     toast(afterAddMsg(e), 'Undo', () => { deleteExpense(e.id); renderCurrent(); });
   } else {
-    updateExpense(sh.id, {a, c: sh.cat, n: note, d: date, p: sh.pay});
+    updateExpense(sh.id, {a, c: sh.cat, n: note, d: date, p: sh.pay, g});
     closeSheet(); renderCurrent();
     toast('Changes saved');
   }
@@ -1343,6 +1555,7 @@ function deleteFromSheet(){
 function quickAdd(i){
   const q = quickCache[i]; if (!q) return;
   const e = {id: uid(), a: q.a, c: q.c, n: q.n, d: todayStr(), p: q.p || 'upi', t: Date.now()};
+  const g = groupOf(q.g); if (g && !g.done) e.g = g.id;
   addExpense(e); renderCurrent();
   toast(afterAddMsg(e), 'Undo', () => { deleteExpense(e.id); renderCurrent(); });
 }
@@ -1356,14 +1569,27 @@ function maybeWelcome(){
 function openWelcome(){
   lastFocus = document.activeElement;
   sh = {mode:'welcome'};
+  const sym = esc(curSym());
+  const row = c => `<div class="lim-row"><span class="ico" style="--c:${c.color}" aria-hidden="true">${c.icon}</span>
+      <span class="lim-main"><span class="lim-name">${esc(c.name)}</span><span class="lim-sub">${esc(c.hint)}</span></span>
+      <label class="money-input sm"><span class="wsym">${sym}</span><input data-wlimit="${c.id}" inputmode="decimal" autocomplete="off" placeholder="${c.group === 'future' ? 'No goal' : 'Amount'}" aria-label="${esc(c.name)} ${c.group === 'future' ? 'monthly goal' : 'monthly amount'}"></label></div>`;
+  const wCats = WELCOME_CATS.map(id => CAT[id]);
   $('#sheet').innerHTML = `<div class="grab" aria-hidden="true"></div>
     <div class="welcome">
       <div class="w-tape" aria-hidden="true"><span style="width:30%;background:#6366F1"></span><span style="width:16%;background:#22A06B"></span><span style="width:13%;background:#F97316"></span><span style="width:8%;background:#0EA5E9"></span><span style="width:6%;background:#C026D3"></span><i></i></div>
       <h2 id="sheetTitle">See where your month is headed</h2>
       <p>Log each expense in a few taps. Daybook keeps a running tally against your budget and warns you before a category runs over.</p>
       <label class="field-label" for="wBudget">Monthly spending budget</label>
-      <div class="money-input"><span id="wSym">${esc(curSym())}</span><input id="wBudget" inputmode="decimal" autocomplete="off" placeholder="30000"></div>
+      <div class="money-input"><span id="wSym">${sym}</span><input id="wBudget" inputmode="decimal" autocomplete="off" placeholder="30000"></div>
       <p class="help">Rent, bills, food, fun: everything you spend. Savings and investments are tracked as goals.</p>
+      <button class="w-more" data-action="welcome-more" aria-expanded="false" aria-controls="wMore"><span><b>Already know some monthly costs?</b><small>Add rent, EMIs or bills now. You can skip this.</small></span>${ICON.right}</button>
+      <div id="wMore" hidden>
+        <p class="help">Each amount becomes that category’s monthly limit, so Daybook can warn you before it runs over. Leave the rest blank.</p>
+        <div>${wCats.filter(c => c.group !== 'future').map(row).join('')}</div>
+        <p class="lim-sum" id="wSum" aria-live="polite"></p>
+        <p class="field-label">Monthly goals</p>
+        <div>${wCats.filter(c => c.group === 'future').map(row).join('')}</div>
+      </div>
       <label class="field-label" for="wCur">Currency</label>
       <select class="select" id="wCur">${CURRENCIES.map(([c, n]) => `<option value="${c}"${S.settings.currency === c ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>
       <button class="save" data-action="welcome-start">Start tracking</button>
@@ -1371,6 +1597,204 @@ function openWelcome(){
       <button class="btn wide" data-action="restore">Restore from a backup file</button>
     </div>`;
   showSheet();
+}
+function updateWelcomeSum(){
+  const p = $('#wSum'); if (!p) return;
+  const total = sum([...document.querySelectorAll('[data-wlimit]')].filter(i => isSpend(i.dataset.wlimit)), i => num(i.value));
+  const B = num($('#wBudget').value);
+  p.classList.toggle('warn', !!B && total > B);
+  p.textContent = !total ? '' : !B ? `These add up to ${money(total)} a month.`
+    : total > B ? `These add up to ${money(total)}, which is ${money(total - B)} more than your budget.`
+    : `These add up to ${money(total)} of your ${money(B)} budget, leaving ${money(B - total)} for everything else.`;
+}
+
+/* ---------- group and income sheets ---------- */
+function openGroupSheet(id){
+  if (sh) return;
+  const g = groupOf(id);
+  if (id && !g) return;
+  lastFocus = document.activeElement;
+  sh = {mode:'group', id: g ? g.id : null, icon: g ? g.icon : GROUP_ICONS[0], apart: g ? g.apart : false};
+  $('#sheet').innerHTML = `<div class="grab" aria-hidden="true"></div>
+    <div class="form-sheet">
+    <div class="sheet-head"><h2 id="sheetTitle">${g ? 'Edit group' : 'New group'}</h2><button class="icon-btn" data-action="sheet-close" aria-label="Close">${ICON.close}</button></div>
+    ${g ? '' : '<p class="help">Group expenses that belong together, like everything for a new car or a trip. Each expense keeps its category too.</p>'}
+    <label class="field-label" for="gName">Name</label>
+    <input class="text-in" id="gName" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="New car, Goa trip, Wedding…" value="${g ? esc(g.name) : ''}">
+    <p class="field-err" id="gErr" aria-live="polite"></p>
+    <p class="field-label" id="gIconLbl">Icon</p>
+    <div class="emoji-pick" role="radiogroup" aria-labelledby="gIconLbl">${GROUP_ICONS.map(i => `<button role="radio" data-action="grp-icon" data-v="${i}">${i}</button>`).join('')}</div>
+    <label class="field-label" for="gTarget">Planned amount</label>
+    <div class="money-input"><span>${esc(curSym())}</span><input id="gTarget" inputmode="decimal" autocomplete="off" placeholder="Optional" value="${g && g.target ? grp(g.target) : ''}"></div>
+    <p class="help" style="margin-top:6px">What you expect to spend on it in total. Daybook shows how much is left.</p>
+    <div class="sw-row"><span class="sw-txt" id="gBudgetLbl"><b>Count in my monthly budget</b><span>Turn this off for big one-off costs like a car, so they don’t use up your monthly budget or category limits.</span></span>
+      <button class="tgl" role="switch" data-action="grp-budget" aria-labelledby="gBudgetLbl"></button></div>
+    <button class="save" data-action="grp-save">${g ? 'Save changes' : 'Create group'}</button>
+    ${g ? `<div class="grp-actions"><button class="btn" data-action="grp-done">${g.done ? 'Reopen group' : 'Mark as finished'}</button><button class="btn danger" data-action="grp-delete">Delete group</button></div>
+    <p class="fine">Finished groups stay in History but leave the add screen. Deleting a group keeps its expenses.</p>` : ''}
+    </div>`;
+  updateGroupSheet(); showSheet();
+}
+function updateGroupSheet(){
+  document.querySelectorAll('[data-action="grp-icon"]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === sh.icon)));
+  $('[data-action="grp-budget"]').setAttribute('aria-checked', String(!sh.apart));
+}
+function groupForm(){
+  const i = $('#gName'), name = i.value.trim().slice(0, 40);
+  if (!name) { i.classList.add('invalid'); $('#gErr').textContent = 'Give the group a name.'; i.focus(); return null; }
+  return {name, icon: sh.icon, target: num($('#gTarget').value), apart: sh.apart};
+}
+function saveGroup(){
+  const f = groupForm(); if (!f) return;
+  const isNew = !sh.id;
+  if (isNew) S.settings.groups.push(Object.assign({id: uid(), done: false}, f));
+  else Object.assign(groupOf(sh.id) || {}, f);
+  persistSettings(); closeSheet(); renderCurrent();
+  toast(isNew ? `Created ${f.name}. Choose it next to the note when you add an expense.` : 'Group saved');
+}
+function toggleGroupDone(){
+  const g = groupOf(sh.id), f = g && groupForm(); if (!f) return;
+  Object.assign(g, f, {done: !g.done});
+  persistSettings(); closeSheet(); renderCurrent();
+  toast(g.done ? `${g.name} is finished. You’ll still find it in History.` : `${g.name} is open again.`);
+}
+function deleteGroup(btn){
+  if (!btn.classList.contains('armed')) {
+    btn.classList.add('armed'); btn.textContent = 'Tap again to delete';
+    setTimeout(() => { if (document.contains(btn)) { btn.classList.remove('armed'); btn.textContent = 'Delete group'; } }, 4000);
+    return;
+  }
+  const at = S.settings.groups.findIndex(x => x.id === sh.id); if (at < 0) return;
+  const g = S.settings.groups[at], ids = new Set(), touched = new Set();
+  // the expenses stay; they just lose the group
+  for (const k in S.months) for (const e of S.months[k]) if (e.g === g.id) { delete e.g; ids.add(e.id); touched.add(k); }
+  S.settings.groups.splice(at, 1);
+  persistSettings(); touched.forEach(persistMonth);
+  closeSheet(); renderCurrent();
+  toast(`Deleted ${g.name}. Its expenses are kept.`, 'Undo', () => {
+    if (!groupOf(g.id)) S.settings.groups.splice(Math.min(at, S.settings.groups.length), 0, g);
+    const back = new Set();
+    for (const k in S.months) for (const e of S.months[k]) if (ids.has(e.id)) { e.g = g.id; back.add(k); }
+    persistSettings(); back.forEach(persistMonth); renderCurrent();
+  });
+}
+function openIncomeSheet(k){
+  if (sh || !MK_RE.test(k || '')) return;
+  lastFocus = document.activeElement;
+  sh = {mode:'income', k};
+  const r = incomeFor(k), c = incomeFor(k, true), title = `Income for ${monthName(k)}`;
+  $('#sheet').innerHTML = `<div class="grab" aria-hidden="true"></div>
+    <div class="form-sheet">
+    <div class="sheet-head"><h2 id="sheetTitle">${esc(title)}</h2><button class="icon-btn" data-action="sheet-close" aria-label="Close">${ICON.close}</button></div>
+    <p class="help">Your salary and anything else that came in. Only ${esc(monthName(k, {month:'long'}))} changes; other months keep their own amounts.</p>
+    <div class="money-input"><span>${esc(curSym())}</span><input id="incIn" inputmode="decimal" autocomplete="off" placeholder="${c.v ? grp(c.v) : 'Amount'}" value="${r.own ? grp(r.v) : ''}" aria-label="${esc(title)}"></div>
+    <p class="help" style="margin-top:6px">${c.v ? `Leave it blank to use ${esc(carriedPhrase(c))}.` : 'Leave it blank to skip the 50/30/20 check for this month.'}</p>
+    <button class="save" data-action="income-save">Save income</button>
+    </div>`;
+  showSheet();
+}
+function saveIncome(){
+  const k = sh.k, v = num($('#incIn').value);
+  setIncome(k, v); persistSettings();
+  closeSheet(); renderCurrent();
+  const r = incomeFor(k), m = monthName(k, {month:'long'});
+  toast(v ? `Income for ${m} saved.` : r.v ? `${m} now uses ${carriedPhrase(r)}.` : `Income for ${m} cleared.`);
+}
+
+/* ---------- guided tours ---------- */
+let tour = null;
+const seenTour = id => !!(loadPrefs().tours || {})[id];
+function markTours(ids){ const t = Object.assign({}, loadPrefs().tours); for (const i of ids) t[i] = 1; savePrefs({tours: t}); }
+function tourSteps(id){
+  const income = {view:'plan', el:() => { const i = $('#incomeIn'); return i && i.closest('.money-input'); }, title:'Income, month by month',
+    text:'Each month keeps its own income. A new month starts with last month’s amount until you change it, and earlier months never change.'};
+  const groups = {view:'plan', el:'#planGroups', title:'Groups for big plans',
+    text:'Put related expenses together, like a new car or a trip. Keep big ones out of your monthly budget so one payment doesn’t throw off the month.'};
+  if (id === 'guide') return [
+    {view:'home', el:'.hero', title:'Your month at a glance', text: S.settings.budget
+      ? 'The big number is what’s left of your budget. The bar fills as you spend, and the line marks where you should be by today.'
+      : 'This is what you’ve spent so far this month. Add a budget in Plan to see what’s left and where you should be by today.'},
+    {view:'home', el:'.fab', title:'Log an expense', text:'Tap + to add one in a few taps. Daybook warns you before a category or your budget runs over.'},
+    income, groups];
+  if (id === 'news') return [{title:'New in Daybook', text:'Your income can now change from month to month, and you can group expenses for things like a new car. Here’s where to find them.'}, income, groups];
+  if (id === 'pick') return [{el:'.grp-pick', title:'Add it to a group', text:'Choose a group here, like a new car or a trip. New expenses start with no group, so everyday spending stays separate.'}];
+  return [];
+}
+function tourTarget(st){
+  const el = typeof st.el === 'function' ? st.el() : st.el ? $(st.el) : null;
+  return el && el.getClientRects().length ? el : null;
+}
+function startTour(id, onDone){
+  if (tour) return;
+  const steps = tourSteps(id); if (!steps.length) return;
+  tour = {id, steps, i: 0, from: view, onDone, focus: document.activeElement};
+  const el = document.createElement('div');
+  el.className = 'tour'; el.id = 'tour';
+  el.innerHTML = '<div class="tour-hole" id="tourHole" hidden></div><div class="tour-card" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText"></div>';
+  document.body.appendChild(el);
+  showTourStep();
+}
+function showTourStep(){
+  const st = tour.steps[tour.i], n = tour.steps.length, last = tour.i === n - 1;
+  if (st.view && st.view !== view) go(st.view);
+  $('#tourCard').innerHTML = `${n > 1 ? `<p class="tour-step">${tour.i + 1} of ${n}</p>` : ''}<h2 id="tourTitle">${esc(st.title)}</h2><p class="tour-text" id="tourText">${esc(st.text)}</p>
+    <div class="tour-btns">${n > 1 && !last ? '<button class="tour-skip" data-action="tour-end">Skip</button>' : ''}<span class="tour-gap"></span>${tour.i ? '<button class="btn" data-action="tour-back">Back</button>' : ''}<button class="btn primary" data-action="tour-next">${n === 1 ? 'Got it' : last ? 'Done' : 'Next'}</button></div>`;
+  const t = tourTarget(st);
+  if (t && t.closest('#sheet')) t.scrollIntoView({block:'nearest'});
+  else if (t && !t.closest('.tabbar')) {
+    // bring the target near the top of the screen so the card fits underneath it
+    const r = t.getBoundingClientRect(), want = Math.max(70, innerHeight * 0.14);
+    if (r.top < 70 || r.top > innerHeight * 0.3) window.scrollTo(0, Math.max(0, scrollY + r.top - want));
+  }
+  placeTour();
+  $('[data-action="tour-next"]').focus({preventScroll:true});
+}
+function placeTour(){
+  if (!tour) return;
+  const t = tourTarget(tour.steps[tour.i]), ov = $('#tour'), hole = $('#tourHole'), card = $('#tourCard');
+  const root = getComputedStyle(document.documentElement);
+  const vw = innerWidth, vh = innerHeight, m = 16, gap = 12, pad = 6;
+  const minT = m + (parseFloat(root.paddingTop) || 0), maxB = vh - m - (parseFloat(root.paddingBottom) || 0);
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  ov.classList.toggle('dim', !t); hole.hidden = !t;
+  let top, left = (vw - cw) / 2;
+  if (!t) top = (vh - ch) / 2;
+  else {
+    const r = t.getBoundingClientRect();
+    const hTop = Math.max(r.top - pad, minT - m + 4);
+    let hBot = Math.min(r.bottom + pad, hTop + vh * 0.45, maxB + m - 4);
+    if (hBot + gap + ch <= maxB) top = hBot + gap;
+    else if (hTop - gap - ch >= minT) top = hTop - gap - ch;
+    // a tall target is cut short so the card fits under its top part instead of covering it
+    else if (hTop + 48 + gap + ch <= maxB) { hBot = maxB - ch - gap; top = hBot + gap; }
+    else top = maxB - ch;
+    const br = parseFloat(getComputedStyle(t).borderTopLeftRadius) || 0;
+    hole.style.cssText = `top:${hTop}px;left:${r.left - pad}px;width:${r.width + pad * 2}px;height:${Math.max(0, hBot - hTop)}px;border-radius:${Math.max(12, br + pad)}px`;
+    left = Math.min(Math.max(r.left + r.width / 2 - cw / 2, m), vw - cw - m);
+  }
+  card.style.top = Math.round(Math.max(minT, top)) + 'px';
+  card.style.left = Math.round(Math.max(m, left)) + 'px';
+}
+function tourMove(d){
+  if (!tour) return;
+  const i = tour.i + d;
+  if (i >= tour.steps.length) { endTour(); return; }
+  tour.i = Math.max(0, i); showTourStep();
+}
+function endTour(){
+  if (!tour) return;
+  const t = tour; tour = null;
+  const el = $('#tour'); if (el) el.remove();
+  // the guide covers everything in the what's-new tour, so it counts for both
+  markTours(t.id === 'guide' ? ['guide', 'news'] : [t.id]);
+  if (t.id !== 'pick' && view !== t.from) go(t.from);
+  if (t.focus && document.contains(t.focus)) { try { t.focus.focus({preventScroll:true}); } catch(e) {} }
+  if (t.onDone) t.onDone();
+}
+function maybeTour(){
+  // people who set up before groups and per-month income existed get a short what's-new tour once
+  if (tour || sh || !S.settings.setup || !hasAnyData() || seenTour('guide') || seenTour('news')) return;
+  setTimeout(() => { if (!tour && !sh) startTour('news'); }, 500);
 }
 
 /* ---------- sample data ---------- */
@@ -1487,7 +1911,9 @@ function restoreFrom(text){
   if (data.settings) {
     const inc = cleanSettings(data.settings);
     S.settings.budget = inc.budget || S.settings.budget;
-    S.settings.income = inc.income || S.settings.income;
+    if (Object.keys(inc.incomes).length) { Object.assign(S.settings.incomes, inc.incomes); S.settings.income = 0; }
+    else if (inc.income && !Object.keys(S.settings.incomes).length) S.settings.income = inc.income;
+    for (const g of inc.groups) { const i = S.settings.groups.findIndex(x => x.id === g.id); if (i >= 0) S.settings.groups[i] = g; else S.settings.groups.push(g); }
     if (Object.keys(inc.limits).length) S.settings.limits = inc.limits;
     S.settings.alertAt = inc.alertAt; S.settings.currency = inc.currency;
     setupFormat();
@@ -1500,8 +1926,8 @@ function restoreFrom(text){
 }
 async function exportCsv(){
   if (!canSaveFiles()) return;
-  const rows = [['Date', 'Category', 'Group', 'Note', 'Amount', 'Currency', 'Paid with']];
-  for (const e of sortedItems(allItems()).reverse()) { const c = catOf(e.c); rows.push([e.d, c.name, GROUPS[c.group].name, e.n || '', e.a, S.settings.currency, PAY[e.p] || '']); }
+  const rows = [['Date', 'Category', 'Type', 'Note', 'Amount', 'Currency', 'Paid with', 'Group']];
+  for (const e of sortedItems(allItems()).reverse()) { const c = catOf(e.c), g = groupOf(e.g); rows.push([e.d, c.name, GROUPS[c.group].name, e.n || '', e.a, S.settings.currency, PAY[e.p] || '', g ? g.name : '']); }
   const csv = rows.map(r => r.map(v => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n');
   try { await saveFile(`daybook-expenses-${todayStr()}.csv`, '\ufeff' + csv, 'text/csv'); toast('CSV export saved'); }
   catch(e) { fileError(e); }
@@ -1529,6 +1955,7 @@ document.addEventListener('click', ev => {
     case 'goto': go(b.dataset.view); break;
     case 'add': openSheet({mode:'add'}); break;
     case 'add-cat': openSheet({mode:'add', cat:b.dataset.cat}); break;
+    case 'add-grp': openSheet({mode:'add', grp:b.dataset.id}); break;
     case 'edit': openSheet({mode:'edit', id:b.dataset.id}); break;
     case 'quick': quickAdd(+b.dataset.i); break;
     case 'ins-prev': insMonth = shiftMonth(insMonth, -1); renderInsights(); break;
@@ -1567,29 +1994,64 @@ document.addEventListener('click', ev => {
     case 'sheet-delete': if (sh) deleteFromSheet(); break;
     case 'welcome-start': {
       const v = num($('#wBudget').value);
+      const lim = {};
+      document.querySelectorAll('[data-wlimit]').forEach(i => { const n = num(i.value); if (n) lim[i.dataset.wlimit] = n; });
+      const n = Object.keys(lim).length;
       S.settings.budget = v; S.settings.setup = true;
+      Object.assign(S.settings.limits, lim);
       persistSettings(); closeSheet(); renderCurrent();
-      if (!v) toast('You can set a budget anytime in Plan.');
+      if (n) toast(`${v ? 'Budget and ' : ''}${plural(n, 'monthly amount')} saved. Change them anytime in Plan.`);
+      else if (!v) toast('You can set a budget anytime in Plan.');
+      if (!seenTour('guide')) setTimeout(() => { if (!sh && !tour) startTour('guide'); }, 360);
       break;
     }
-    case 'welcome-sample': loadSample(); sh = {mode:'welcome-done'}; closeSheet(); heroAnimated = false; renderCurrent(); toast('Here’s a sample month. Remove it anytime from Plan.'); break;
+    case 'welcome-more': {
+      const open = b.getAttribute('aria-expanded') !== 'true';
+      b.setAttribute('aria-expanded', String(open)); $('#wMore').hidden = !open;
+      if (open) $('#sheet').scrollTop = b.offsetTop - 12;
+      break;
+    }
+    case 'plan-groups': go('plan'); { const s = $('#planGroups'); if (s) s.scrollIntoView(); } break;
+    case 'grp-new': openGroupSheet(null); break;
+    case 'grp-edit': openGroupSheet(b.dataset.id); break;
+    case 'grp-icon': if (sh && sh.mode === 'group') { sh.icon = b.dataset.v; updateGroupSheet(); } break;
+    case 'grp-budget': if (sh && sh.mode === 'group') { sh.apart = !sh.apart; updateGroupSheet(); } break;
+    case 'grp-save': if (sh && sh.mode === 'group') saveGroup(); break;
+    case 'grp-done': if (sh && sh.mode === 'group') toggleGroupDone(); break;
+    case 'grp-delete': if (sh && sh.mode === 'group') deleteGroup(b); break;
+    case 'income-edit': openIncomeSheet(b.dataset.k); break;
+    case 'income-save': if (sh && sh.mode === 'income') saveIncome(); break;
+    case 'welcome-sample': {
+      loadSample(); sh = {mode:'welcome-done'}; closeSheet(); heroAnimated = false; renderCurrent();
+      const note = () => toast('Here’s a sample month. Remove it anytime from Plan.');
+      if (seenTour('guide')) note();
+      else setTimeout(() => { if (!sh && !tour) startTour('guide', note); else note(); }, 360);
+      break;
+    }
+    case 'tour-next': tourMove(1); break;
+    case 'tour-back': tourMove(-1); break;
+    case 'tour-end': endTour(); break;
+    case 'tour-replay': startTour('guide'); break;
   }
 });
 document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.id === 'histSearch') { histQuery = t.value; histLimit = 120; renderHistList(); return; }
   if (t.id === 'noteIn' && sh) { sh.note = t.value; return; }
+  if (t.id === 'wBudget' || (t.dataset && t.dataset.wlimit)) { updateWelcomeSum(); return; }
+  if (t.id === 'gName') { t.classList.remove('invalid'); $('#gErr').textContent = ''; return; }
   if (t.closest && t.closest('#view-plan')) {
     if (t.dataset.limit) { const v = num(t.value); if (v) S.settings.limits[t.dataset.limit] = v; else delete S.settings.limits[t.dataset.limit]; updateLimSum(); persistSettingsSoon(); }
     else if (t.id === 'budgetIn') { S.settings.budget = num(t.value); updateLimSum(); persistSettingsSoon(); }
-    else if (t.id === 'incomeIn') { S.settings.income = num(t.value); persistSettingsSoon(); }
+    else if (t.id === 'incomeIn') { const k = todayStr().slice(0, 7); setIncome(k, num(t.value)); $('#incNote').textContent = incomeNote(k); persistSettingsSoon(); }
   }
 });
 document.addEventListener('change', ev => {
   const t = ev.target;
   if (t.id === 'dateIn' && sh) { if (t.value) { sh.date = t.value > todayStr() ? todayStr() : t.value; } updateSheet(); }
   else if (t.id === 'curSel') { S.settings.currency = t.value; setupFormat(); persistSettings(); t.blur(); renderPlan(); }
-  else if (t.id === 'wCur') { S.settings.currency = t.value; setupFormat(); $('#wSym').textContent = curSym(); }
+  else if (t.id === 'grpSel' && sh) { sh.grp = t.value; updateSheet(); }
+  else if (t.id === 'wCur') { S.settings.currency = t.value; setupFormat(); document.querySelectorAll('#wSym, .wsym').forEach(x => { x.textContent = curSym(); }); updateWelcomeSum(); }
   else if (t.id === 'restoreIn') {
     const f = t.files && t.files[0];
     if (f) { const r = new FileReader(); r.onload = () => restoreFrom(String(r.result || '')); r.onerror = () => toast('Couldn’t read that file.'); r.readAsText(f); }
@@ -1601,10 +2063,26 @@ document.addEventListener('focusout', ev => {
   if (ev.target.closest && ev.target.closest('#view-plan')) setTimeout(() => { if (planDirty && view === 'plan') renderPlan(); }, 0);
 });
 document.addEventListener('keydown', ev => {
+  if (tour) {
+    // shortcuts pause during a tour; focus stays on the card's buttons
+    if (ev.key === 'Escape') { ev.preventDefault(); endTour(); }
+    else if (ev.key === 'ArrowRight') { ev.preventDefault(); tourMove(1); }
+    else if (ev.key === 'ArrowLeft') { ev.preventDefault(); tourMove(-1); }
+    else if (ev.key === 'Tab') {
+      ev.preventDefault();
+      const bs = [...document.querySelectorAll('#tourCard button')], i = bs.indexOf(document.activeElement);
+      bs[(i + (ev.shiftKey ? bs.length - 1 : 1) + bs.length) % bs.length].focus();
+    }
+    return;
+  }
   const tag = (ev.target.tagName || '').toLowerCase();
   const typing = tag === 'input' || tag === 'select' || tag === 'textarea';
   if (ev.key === 'Escape' && sh) { closeSheet(); return; }
   if (sh && sh.mode === 'welcome') { if (ev.key === 'Enter' && ev.target.id === 'wBudget') { ev.preventDefault(); const b = $('[data-action="welcome-start"]'); if (b) b.click(); } return; }
+  if (sh && (sh.mode === 'group' || sh.mode === 'income')) {
+    if (ev.key === 'Enter' && tag === 'input') { ev.preventDefault(); const b = $(sh.mode === 'group' ? '[data-action="grp-save"]' : '[data-action="income-save"]'); if (b) b.click(); }
+    return;
+  }
   if (sh && (sh.mode === 'add' || sh.mode === 'edit')) {
     if (ev.key === 'Enter' && (!typing || ev.target.id === 'noteIn')) { ev.preventDefault(); if (ev.target.id === 'noteIn' && !num(sh.amount)) { ev.target.blur(); return; } saveSheet(); return; }
     if (typing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
@@ -1626,6 +2104,8 @@ document.addEventListener('touchstart', () => {}, {passive: true});
   if (mq) { if (mq.addEventListener) mq.addEventListener('change', syncThemeColor); else if (mq.addListener) mq.addListener(syncThemeColor); }
 })();
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (VIEWS.indexOf(h) >= 0) go(h); });
+window.addEventListener('resize', () => { if (tour) placeTour(); });
+document.addEventListener('scroll', () => { if (tour) placeTour(); }, {capture: true, passive: true});
 
 /* ---------- boot ---------- */
 (function boot(){
@@ -1648,10 +2128,10 @@ window.addEventListener('hashchange', () => { const h = location.hash.slice(1); 
     }
   }
   if (!HOSTED) {
-    initCloud().then(() => { setSync(); maybeWelcome(); if (view === 'plan') renderPlan(); });
+    initCloud().then(() => { setSync(); maybeWelcome(); maybeTour(); if (view === 'plan') renderPlan(); });
     window.claude.use('downloads').then(ns => { downloadsNS = ns; if (view === 'plan') renderPlan(); }).catch(() => {});
   } else {
-    maybeWelcome();
+    maybeWelcome(); maybeTour();
   }
 })();
 })();
